@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Financeiro - Grupo de Oração RCC</title>
+    <title>Sistema Financeiro - Grupo de Oração</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -50,9 +50,6 @@
         .gradient-gold {
             background: linear-gradient(135deg, #d4902a 0%, #edc67a 50%, #d4902a 100%);
         }
-        .gradient-church {
-            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
-        }
         .card-hover {
             transition: all 0.3s ease;
         }
@@ -82,7 +79,6 @@
             25% { transform: translateX(-10px); }
             75% { transform: translateX(10px); }
         }
-        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -99,23 +95,12 @@
         }
         .login-bg {
             background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #1e40af 100%);
-            position: relative;
-            overflow: hidden;
-        }
-        .login-bg::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-            background-size: 20px 20px;
-            opacity: 0.3;
-        }
-        .readonly-mode {
-            pointer-events: none;
-            opacity: 0.6;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
         }
         .readonly-badge {
             position: fixed;
@@ -130,467 +115,464 @@
             z-index: 1000;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
+        .ano-tab {
+            transition: all 0.3s ease;
+        }
+        .ano-tab.active {
+            background: linear-gradient(135deg, #d4902a, #b87620);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(212, 144, 42, 0.3);
+        }
+        .ano-tab:not(.active):hover {
+            background: #f3f4f6;
+        }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800">
 
     <!-- TELA DE LOGIN -->
-    <div id="loginScreen" class="fixed inset-0 login-bg flex items-center justify-center z-50">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden slide-in">
+    <div id="loginScreen" class="login-bg flex items-center justify-center">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden slide-in m-4">
             <div class="bg-gradient-to-r from-church-800 to-church-600 p-8 text-center">
                 <div class="w-20 h-20 rounded-full gradient-gold mx-auto flex items-center justify-center text-white text-3xl mb-4 shadow-lg">
                     <i class="fas fa-church"></i>
                 </div>
-                <h1 class="text-2xl font-serif font-bold text-white mb-2">RCC Finanças</h1>
-                <p class="text-church-100 text-sm">Grupo de Oração - Acesso Restrito</p>
+                <h1 class="text-2xl font-serif font-bold text-white mb-2">Finanças</h1>
+                <p class="text-church-100 text-sm">Grupo de Oração</p>
             </div>
             
             <div class="p-8">
                 <div id="loginError" class="hidden mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg text-sm flex items-center gap-2">
                     <i class="fas fa-exclamation-circle"></i>
-                    <span>Usuário ou senha incorretos!</span>
+                    <span id="loginErrorText">Usuário ou senha incorretos!</span>
                 </div>
 
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Usuário</label>
-                        <div class="relative">
-                            <i class="fas fa-user absolute left-3 top-3 text-gray-400"></i>
-                            <input type="text" id="loginUser" class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-church-500 focus:border-church-500 transition-all" placeholder="Digite seu usuário">
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
-                        <div class="relative">
-                            <i class="fas fa-lock absolute left-3 top-3 text-gray-400"></i>
-                            <input type="password" id="loginPass" class="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-church-500 focus:border-church-500 transition-all" placeholder="Digite sua senha">
-                            <button type="button" onclick="togglePassword()" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600">
-                                <i class="fas fa-eye" id="eyeIcon"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-between text-sm">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" id="lembrarMe" class="rounded text-church-600 focus:ring-church-500">
-                            <span class="text-gray-600">Lembrar-me</span>
-                        </label>
-                        <button onclick="mostrarAjuda()" class="text-church-600 hover:text-church-800 font-medium">Precisa de ajuda?</button>
-                    </div>
-
-                    <button onclick="fazerLogin()" class="w-full py-3 bg-gradient-to-r from-church-700 to-church-600 text-white rounded-lg hover:from-church-800 hover:to-church-700 transition-all font-medium shadow-lg transform hover:scale-[1.02]">
-                        Entrar no Sistema
-                    </button>
-                </div>
-
-                <div class="mt-6 pt-6 border-t border-gray-200 text-center">
-                    <p class="text-xs text-gray-500 mb-2">Níveis de Acesso:</p>
-                    <div class="flex justify-center gap-4 text-xs">
-                        <span class="flex items-center gap-1 text-green-600 font-medium">
-                            <i class="fas fa-shield-alt"></i> Admin: Edição total
-                        </span>
-                        <span class="flex items-center gap-1 text-blue-600 font-medium">
-                            <i class="fas fa-eye"></i> Visualizador: Apenas leitura
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- BADGE MODO LEITURA -->
-    <div id="readOnlyBadge" class="readonly-badge hidden">
-        <i class="fas fa-eye mr-1"></i> Modo Visualização
-    </div>
-
-    <!-- Sidebar -->
-    <div id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-church-900 text-white transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 shadow-2xl">
-        <div class="p-6 border-b border-church-700">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full gradient-gold flex items-center justify-center text-white font-bold text-lg">
-                    <i class="fas fa-church"></i>
-                </div>
-                <div>
-                    <h1 class="font-serif text-lg font-bold">RCC Finanças</h1>
-                    <p class="text-xs text-gray-300">Grupo de Oração</p>
-                </div>
-            </div>
-            <div class="mt-4 flex items-center gap-2 text-xs text-gray-300 bg-church-800 rounded-lg p-2">
-                <i class="fas fa-user-circle"></i>
-                <span id="userDisplay">Usuário</span>
-                <span id="roleDisplay" class="ml-auto px-2 py-0.5 rounded-full bg-gold-500 text-white text-[10px] font-bold">ADMIN</span>
-            </div>
-        </div>
-        
-        <nav class="p-4 space-y-2">
-            <button onclick="showSection('dashboard')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-church-800 transition-colors text-left bg-church-800">
-                <i class="fas fa-chart-line w-5"></i>
-                <span>Dashboard</span>
-            </button>
-            <button onclick="showSection('membros')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-church-800 transition-colors text-left">
-                <i class="fas fa-users w-5"></i>
-                <span>Mensalidades</span>
-            </button>
-            <button onclick="showSection('entradas')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-church-800 transition-colors text-left">
-                <i class="fas fa-arrow-down text-green-400 w-5"></i>
-                <span>Entradas</span>
-            </button>
-            <button onclick="showSection('saidas')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-church-800 transition-colors text-left">
-                <i class="fas fa-arrow-up text-red-400 w-5"></i>
-                <span>Saídas</span>
-            </button>
-            <button onclick="showSection('relatorios')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-church-800 transition-colors text-left">
-                <i class="fas fa-file-alt w-5"></i>
-                <span>Relatórios</span>
-            </button>
-        </nav>
-
-        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-church-700 space-y-2">
-            <div class="bg-church-800 rounded-lg p-3">
-                <p class="text-xs text-gray-300 mb-1">Saldo Atual</p>
-                <p class="text-xl font-bold text-gold-300" id="sidebarSaldo">R$ 0,00</p>
-            </div>
-            <button onclick="fazerLogout()" class="w-full flex items-center gap-2 px-4 py-2 bg-red-600/20 text-red-300 rounded-lg hover:bg-red-600/30 transition-colors text-sm">
-                <i class="fas fa-sign-out-alt"></i>
-                Sair do Sistema
-            </button>
-        </div>
-    </div>
-
-    <!-- Mobile Menu Button -->
-    <button onclick="toggleSidebar()" class="md:hidden fixed top-4 left-4 z-30 bg-church-900 text-white p-3 rounded-lg shadow-lg">
-        <i class="fas fa-bars"></i>
-    </button>
-
-    <!-- Main Content -->
-    <div class="md:ml-64 min-h-screen">
-        
-        <!-- Header -->
-        <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
-            <div class="px-6 py-4 flex justify-between items-center">
-                <div>
-                    <h2 class="text-2xl font-serif font-bold text-gray-800" id="pageTitle">Dashboard</h2>
-                    <p class="text-sm text-gray-500" id="currentDate"></p>
-                </div>
-                <div class="flex items-center gap-4">
-                    <button onclick="backupData()" class="admin-only hidden sm:flex items-center gap-2 px-4 py-2 bg-gold-100 text-gold-700 rounded-lg hover:bg-gold-200 transition-colors text-sm font-medium">
-                        <i class="fas fa-download"></i>
-                        Backup
-                    </button>
-                    <label class="admin-only hidden sm:flex items-center gap-2 px-4 py-2 bg-church-100 text-church-700 rounded-lg hover:bg-church-200 transition-colors text-sm font-medium cursor-pointer">
-                        <i class="fas fa-upload"></i>
-                        Restaurar
-                        <input type="file" id="restoreFile" class="hidden" accept=".json" onchange="restoreData(this)">
-                    </label>
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-white font-bold shadow-lg">
-                        CF
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <!-- Content Sections -->
-        <main class="p-6 space-y-6">
-
-            <!-- DASHBOARD SECTION -->
-            <section id="dashboard" class="section-content fade-in">
-                <!-- Alerta Visualizador -->
-                <div id="viewerAlert" class="hidden mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-3">
-                    <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
-                    <div>
-                        <h4 class="font-medium text-blue-900">Modo Visualização Ativo</h4>
-                        <p class="text-sm text-blue-700 mt-1">Você está acessando como visitante. Entre com uma conta de administrador para editar dados.</p>
-                    </div>
-                </div>
-
-                <!-- Cards Resumo -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 card-hover">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <p class="text-sm text-gray-500 font-medium">Saldo Atual</p>
-                                <h3 class="text-2xl font-bold text-gray-800 mt-1" id="cardSaldo">R$ 0,00</h3>
-                            </div>
-                            <div class="w-12 h-12 rounded-lg bg-church-100 flex items-center justify-center text-church-600">
-                                <i class="fas fa-wallet text-xl"></i>
-                            </div>
-                        </div>
-                        <div class="flex items-center text-sm">
-                            <span class="text-gray-400">Atualizado hoje</span>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 card-hover">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <p class="text-sm text-gray-500 font-medium">Entradas (Mês)</p>
-                                <h3 class="text-2xl font-bold text-green-600 mt-1" id="cardEntradas">R$ 0,00</h3>
-                            </div>
-                            <div class="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center text-green-600">
-                                <i class="fas fa-arrow-down text-xl"></i>
-                            </div>
-                        </div>
-                        <div class="flex items-center text-sm text-green-600">
-                            <i class="fas fa-chart-line mr-1"></i>
-                            <span>Receitas</span>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 card-hover">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <p class="text-sm text-gray-500 font-medium">Saídas (Mês)</p>
-                                <h3 class="text-2xl font-bold text-red-600 mt-1" id="cardSaidas">R$ 0,00</h3>
-                            </div>
-                            <div class="w-12 h-12 rounded-lg bg-red-100 flex items-center justify-center text-red-600">
-                                <i class="fas fa-arrow-up text-xl"></i>
-                            </div>
-                        </div>
-                        <div class="flex items-center text-sm text-red-600">
-                            <i class="fas fa-chart-line mr-1"></i>
-                            <span>Despesas</span>
-                        </div>
-                    </div>
-
-                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 card-hover">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <p class="text-sm text-gray-500 font-medium">Mensalidades</p>
-                                <h3 class="text-2xl font-bold text-gold-600 mt-1" id="cardMensalidades">0/0</h3>
-                            </div>
-                            <div class="w-12 h-12 rounded-lg bg-gold-100 flex items-center justify-center text-gold-600">
-                                <i class="fas fa-users text-xl"></i>
-                            </div>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
-                            <div class="bg-gold-500 h-2 rounded-full" id="barMensalidades" style="width: 0%"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Gráfico e Últimas Transações -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <h3 class="font-serif text-lg font-bold text-gray-800 mb-4">Fluxo Financeiro - Últimos 6 Meses</h3>
-                        <canvas id="financeChart" width="400" height="200"></canvas>
-                    </div>
-
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <h3 class="font-serif text-lg font-bold text-gray-800 mb-4">Últimas Transações</h3>
-                        <div class="space-y-3 max-h-80 overflow-y-auto" id="ultimasTransacoes">
-                            <!-- Preenchido via JS -->
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- MEMBROS SECTION -->
-            <section id="membros" class="section-content hidden fade-in">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <!-- Área do Administrador -->
+                <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <h3 class="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
+                        <i class="fas fa-shield-alt text-gold-500"></i>
+                        Acesso Administrativo
+                    </h3>
+                    <div class="space-y-3">
                         <div>
-                            <h3 class="font-serif text-lg font-bold text-gray-800">Controle de Mensalidades</h3>
-                            <p class="text-sm text-gray-500">Gerencie os pagamentos mensais dos membros</p>
+                            <input type="text" id="loginUser" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-church-500 focus:border-church-500 text-sm" placeholder="Usuário: admin">
                         </div>
-                        <button onclick="openModal('membro')" class="admin-only px-4 py-2 bg-church-600 text-white rounded-lg hover:bg-church-700 transition-colors flex items-center gap-2">
-                            <i class="fas fa-plus"></i>
-                            Novo Membro
-                        </button>
-                    </div>
-                    
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="bg-gray-50 border-b border-gray-100">
-                                <tr>
-                                    <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Membro</th>
-                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Jan</th>
-                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Fev</th>
-                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Mar</th>
-                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Abr</th>
-                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Mai</th>
-                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Jun</th>
-                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Jul</th>
-                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Ago</th>
-                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Set</th>
-                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Out</th>
-                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Nov</th>
-                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Dez</th>
-                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
-                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider admin-only">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabelaMembros" class="divide-y divide-gray-100">
-                                <!-- Preenchido via JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ENTRADAS SECTION -->
-            <section id="entradas" class="section-content hidden fade-in">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2">
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                                <div>
-                                    <h3 class="font-serif text-lg font-bold text-gray-800">Histórico de Entradas</h3>
-                                    <p class="text-sm text-gray-500">Coletas, doações e rendimentos</p>
-                                </div>
-                                <button onclick="openModal('entrada')" class="admin-only px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
-                                    <i class="fas fa-plus"></i>
-                                    Nova Entrada
-                                </button>
-                            </div>
-                            <div class="overflow-x-auto">
-                                <table class="w-full">
-                                    <thead class="bg-gray-50 border-b border-gray-100">
-                                        <tr>
-                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Data</th>
-                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Descrição</th>
-                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Categoria</th>
-                                            <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Valor</th>
-                                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase admin-only">Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tabelaEntradas" class="divide-y divide-gray-100">
-                                        <!-- Preenchido via JS -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-6">
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                            <h3 class="font-serif text-lg font-bold text-gray-800 mb-4">Resumo por Categoria</h3>
-                            <div id="resumoEntradas" class="space-y-3">
-                                <!-- Preenchido via JS -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SAÍDAS SECTION -->
-            <section id="saidas" class="section-content hidden fade-in">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2">
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                                <div>
-                                    <h3 class="font-serif text-lg font-bold text-gray-800">Histórico de Saídas</h3>
-                                    <p class="text-sm text-gray-500">Pagamentos e despesas</p>
-                                </div>
-                                <button onclick="openModal('saida')" class="admin-only px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2">
-                                    <i class="fas fa-plus"></i>
-                                    Nova Saída
-                                </button>
-                            </div>
-                            <div class="overflow-x-auto">
-                                <table class="w-full">
-                                    <thead class="bg-gray-50 border-b border-gray-100">
-                                        <tr>
-                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Data</th>
-                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Descrição</th>
-                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Categoria</th>
-                                            <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Valor</th>
-                                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase admin-only">Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tabelaSaidas" class="divide-y divide-gray-100">
-                                        <!-- Preenchido via JS -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-6">
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                            <h3 class="font-serif text-lg font-bold text-gray-800 mb-4">Resumo por Categoria</h3>
-                            <div id="resumoSaidas" class="space-y-3">
-                                <!-- Preenchido via JS -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- RELATÓRIOS SECTION -->
-            <section id="relatorios" class="section-content hidden fade-in">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <h3 class="font-serif text-lg font-bold text-gray-800 mb-4">Exportar Dados</h3>
-                        <div class="space-y-3">
-                            <button onclick="exportarExcel()" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                                <i class="fas fa-file-excel"></i>
-                                Exportar para Excel
-                            </button>
-                            <button onclick="exportarPDF()" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                                <i class="fas fa-file-pdf"></i>
-                                Exportar Relatório PDF
+                        <div class="relative">
+                            <input type="password" id="loginPass" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-church-500 focus:border-church-500 text-sm" placeholder="Senha: Rcc2025!">
+                            <button type="button" onclick="togglePassword()" class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-eye text-sm" id="eyeIcon"></i>
                             </button>
                         </div>
-                    </div>
-
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <h3 class="font-serif text-lg font-bold text-gray-800 mb-4">Filtros</h3>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Mês</label>
-                                <select id="filtroMes" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-church-500 focus:border-church-500">
-                                    <option value="todos">Todos</option>
-                                    <option value="0">Janeiro</option>
-                                    <option value="1">Fevereiro</option>
-                                    <option value="2">Março</option>
-                                    <option value="3">Abril</option>
-                                    <option value="4">Maio</option>
-                                    <option value="5">Junho</option>
-                                    <option value="6">Julho</option>
-                                    <option value="7">Agosto</option>
-                                    <option value="8">Setembro</option>
-                                    <option value="9">Outubro</option>
-                                    <option value="10">Novembro</option>
-                                    <option value="11">Dezembro</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Ano</label>
-                                <select id="filtroAno" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-church-500 focus:border-church-500">
-                                    <option value="2025">2025</option>
-                                    <option value="2026">2026</option>
-                                </select>
-                            </div>
-                        </div>
-                        <button onclick="aplicarFiltro()" class="mt-3 w-full px-4 py-2 bg-church-600 text-white rounded-lg hover:bg-church-700 transition-colors">
-                            Aplicar Filtro
+                        <button onclick="fazerLoginAdmin()" class="w-full py-2 bg-church-600 text-white rounded-lg hover:bg-church-700 transition-colors text-sm font-medium">
+                            Entrar como Administrador
                         </button>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                    <h3 class="font-serif text-lg font-bold text-gray-800 mb-4">Balanço Anual</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead class="bg-gray-50 border-b border-gray-100">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Mês</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Entradas</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Saídas</th>
-                                    <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Saldo</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabelaBalanco" class="divide-y divide-gray-100">
-                                <!-- Preenchido via JS -->
-                            </tbody>
-                        </table>
+                <!-- Divisor -->
+                <div class="relative mb-6">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-200"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-white text-gray-500">ou</span>
                     </div>
                 </div>
-            </section>
 
-        </main>
+                <!-- Área do Visitante -->
+                <button onclick="fazerLoginVisitante()" class="w-full py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium flex items-center justify-center gap-2 border-2 border-dashed border-gray-300">
+                    <i class="fas fa-eye text-blue-500"></i>
+                    Entrar como Visitante
+                </button>
+                <p class="text-xs text-gray-500 mt-2 text-center">Acesso apenas para visualização</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTEÚDO PRINCIPAL (inicialmente oculto) -->
+    <div id="mainContent" class="hidden">
+        <!-- BADGE MODO LEITURA -->
+        <div id="readOnlyBadge" class="readonly-badge hidden">
+            <i class="fas fa-eye mr-1"></i> Modo Visualização
+        </div>
+
+        <!-- Sidebar -->
+        <div id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-church-900 text-white transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 shadow-2xl">
+            <div class="p-6 border-b border-church-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full gradient-gold flex items-center justify-center text-white font-bold text-lg">
+                        <i class="fas fa-church"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-serif text-lg font-bold">Finanças</h1>
+                        <p class="text-xs text-gray-300">Grupo de Oração</p>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center gap-2 text-xs text-gray-300 bg-church-800 rounded-lg p-2">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="userDisplay">Usuário</span>
+                    <span id="roleDisplay" class="ml-auto px-2 py-0.5 rounded-full bg-gold-500 text-white text-[10px] font-bold">ADMIN</span>
+                </div>
+            </div>
+            
+            <nav class="p-4 space-y-2">
+                <button onclick="showSection('dashboard')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-church-800 transition-colors text-left bg-church-800">
+                    <i class="fas fa-chart-line w-5"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button onclick="showSection('membros')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-church-800 transition-colors text-left">
+                    <i class="fas fa-users w-5"></i>
+                    <span>Mensalidades</span>
+                </button>
+                <button onclick="showSection('entradas')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-church-800 transition-colors text-left">
+                    <i class="fas fa-arrow-down text-green-400 w-5"></i>
+                    <span>Entradas</span>
+                </button>
+                <button onclick="showSection('saidas')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-church-800 transition-colors text-left">
+                    <i class="fas fa-arrow-up text-red-400 w-5"></i>
+                    <span>Saídas</span>
+                </button>
+                <button onclick="showSection('relatorios')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-church-800 transition-colors text-left">
+                    <i class="fas fa-file-alt w-5"></i>
+                    <span>Relatórios</span>
+                </button>
+            </nav>
+
+            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-church-700 space-y-2">
+                <div class="bg-church-800 rounded-lg p-3">
+                    <p class="text-xs text-gray-300 mb-1">Saldo Atual</p>
+                    <p class="text-xl font-bold text-gold-300" id="sidebarSaldo">R$ 0,00</p>
+                </div>
+                <button onclick="fazerLogout()" class="w-full flex items-center gap-2 px-4 py-2 bg-red-600/20 text-red-300 rounded-lg hover:bg-red-600/30 transition-colors text-sm">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Sair
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <button onclick="toggleSidebar()" class="md:hidden fixed top-4 left-4 z-30 bg-church-900 text-white p-3 rounded-lg shadow-lg">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Main Content Area -->
+        <div class="md:ml-64 min-h-screen">
+            <!-- Header -->
+            <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
+                <div class="px-6 py-4 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-serif font-bold text-gray-800" id="pageTitle">Dashboard</h2>
+                        <p class="text-sm text-gray-500" id="currentDate"></p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <button onclick="backupData()" class="admin-only hidden sm:flex items-center gap-2 px-4 py-2 bg-gold-100 text-gold-700 rounded-lg hover:bg-gold-200 transition-colors text-sm font-medium">
+                            <i class="fas fa-download"></i>
+                            Backup
+                        </button>
+                        <label class="admin-only hidden sm:flex items-center gap-2 px-4 py-2 bg-church-100 text-church-700 rounded-lg hover:bg-church-200 transition-colors text-sm font-medium cursor-pointer">
+                            <i class="fas fa-upload"></i>
+                            Restaurar
+                            <input type="file" id="restoreFile" class="hidden" accept=".json" onchange="restoreData(this)">
+                        </label>
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-gold-400 to-gold-600 flex items-center justify-center text-white font-bold shadow-lg">
+                            CF
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Sections -->
+            <main class="p-6 space-y-6">
+                <!-- DASHBOARD SECTION -->
+                <section id="dashboard" class="section-content fade-in">
+                    <div id="viewerAlert" class="hidden mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-3">
+                        <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                        <div>
+                            <h4 class="font-medium text-blue-900">Modo Visualização Ativo</h4>
+                            <p class="text-sm text-blue-700 mt-1">Você está acessando como visitante. Entre como administrador para editar dados.</p>
+                        </div>
+                    </div>
+
+                    <!-- Cards Resumo -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 card-hover">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <p class="text-sm text-gray-500 font-medium">Saldo Atual</p>
+                                    <h3 class="text-2xl font-bold text-gray-800 mt-1" id="cardSaldo">R$ 0,00</h3>
+                                </div>
+                                <div class="w-12 h-12 rounded-lg bg-church-100 flex items-center justify-center text-church-600">
+                                    <i class="fas fa-wallet text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 card-hover">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <p class="text-sm text-gray-500 font-medium">Entradas (Mês)</p>
+                                    <h3 class="text-2xl font-bold text-green-600 mt-1" id="cardEntradas">R$ 0,00</h3>
+                                </div>
+                                <div class="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center text-green-600">
+                                    <i class="fas fa-arrow-down text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 card-hover">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <p class="text-sm text-gray-500 font-medium">Saídas (Mês)</p>
+                                    <h3 class="text-2xl font-bold text-red-600 mt-1" id="cardSaidas">R$ 0,00</h3>
+                                </div>
+                                <div class="w-12 h-12 rounded-lg bg-red-100 flex items-center justify-center text-red-600">
+                                    <i class="fas fa-arrow-up text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 card-hover">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <p class="text-sm text-gray-500 font-medium">Mensalidades</p>
+                                    <h3 class="text-2xl font-bold text-gold-600 mt-1" id="cardMensalidades">0/0</h3>
+                                </div>
+                                <div class="w-12 h-12 rounded-lg bg-gold-100 flex items-center justify-center text-gold-600">
+                                    <i class="fas fa-users text-xl"></i>
+                                </div>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                                <div class="bg-gold-500 h-2 rounded-full" id="barMensalidades" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico e Últimas Transações -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <h3 class="font-serif text-lg font-bold text-gray-800 mb-4">Fluxo Financeiro - Últimos 6 Meses</h3>
+                            <canvas id="financeChart" width="400" height="200"></canvas>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <h3 class="font-serif text-lg font-bold text-gray-800 mb-4">Últimas Transações</h3>
+                            <div class="space-y-3 max-h-96 overflow-y-auto" id="ultimasTransacoes"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- MEMBROS SECTION -->
+                <section id="membros" class="section-content hidden fade-in">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div>
+                                <h3 class="font-serif text-lg font-bold text-gray-800">Controle de Mensalidades</h3>
+                                <p class="text-sm text-gray-500">Gerencie os pagamentos mensais dos membros</p>
+                            </div>
+                            <button onclick="openModal('membro')" class="admin-only px-4 py-2 bg-church-600 text-white rounded-lg hover:bg-church-700 transition-colors flex items-center gap-2">
+                                <i class="fas fa-plus"></i>
+                                Novo Membro
+                            </button>
+                        </div>
+                        
+                        <!-- Abas de Ano -->
+                        <div class="px-6 py-3 bg-gray-50 border-b border-gray-100">
+                            <div class="flex gap-2 overflow-x-auto" id="abasAnosMembros"></div>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50 border-b border-gray-100">
+                                    <tr>
+                                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase">Membro</th>
+                                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">Jan</th>
+                                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">Fev</th>
+                                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">Mar</th>
+                                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">Abr</th>
+                                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">Mai</th>
+                                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">Jun</th>
+                                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">Jul</th>
+                                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">Ago</th>
+                                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">Set</th>
+                                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">Out</th>
+                                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">Nov</th>
+                                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">Dez</th>
+                                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase">Total</th>
+                                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase admin-only">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelaMembros" class="divide-y divide-gray-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ENTRADAS SECTION -->
+                <section id="entradas" class="section-content hidden fade-in">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2">
+                            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                                <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <h3 class="font-serif text-lg font-bold text-gray-800">Histórico de Entradas</h3>
+                                        <p class="text-sm text-gray-500">Coletas, doações e rendimentos</p>
+                                    </div>
+                                    <button onclick="openModal('entrada')" class="admin-only px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
+                                        <i class="fas fa-plus"></i>
+                                        Nova Entrada
+                                    </button>
+                                </div>
+                                
+                                <!-- Abas de Ano -->
+                                <div class="px-6 py-3 bg-gray-50 border-b border-gray-100">
+                                    <div class="flex gap-2 overflow-x-auto" id="abasAnosEntradas"></div>
+                                </div>
+                                
+                                <div class="overflow-x-auto">
+                                    <table class="w-full">
+                                        <thead class="bg-gray-50 border-b border-gray-100">
+                                            <tr>
+                                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Data</th>
+                                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Descrição</th>
+                                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Categoria</th>
+                                                <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Valor</th>
+                                                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase admin-only">Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tabelaEntradas" class="divide-y divide-gray-100"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                                <h3 class="font-serif text-lg font-bold text-gray-800 mb-4">Resumo por Categoria</h3>
+                                <div id="resumoEntradas" class="space-y-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SAÍDAS SECTION -->
+                <section id="saidas" class="section-content hidden fade-in">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2">
+                            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                                <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                    <div>
+                                        <h3 class="font-serif text-lg font-bold text-gray-800">Histórico de Saídas</h3>
+                                        <p class="text-sm text-gray-500">Pagamentos e despesas</p>
+                                    </div>
+                                    <button onclick="openModal('saida')" class="admin-only px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2">
+                                        <i class="fas fa-plus"></i>
+                                        Nova Saída
+                                    </button>
+                                </div>
+                                
+                                <!-- Abas de Ano -->
+                                <div class="px-6 py-3 bg-gray-50 border-b border-gray-100">
+                                    <div class="flex gap-2 overflow-x-auto" id="abasAnosSaidas"></div>
+                                </div>
+                                
+                                <div class="overflow-x-auto">
+                                    <table class="w-full">
+                                        <thead class="bg-gray-50 border-b border-gray-100">
+                                            <tr>
+                                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Data</th>
+                                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Descrição</th>
+                                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Categoria</th>
+                                                <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Valor</th>
+                                                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase admin-only">Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tabelaSaidas" class="divide-y divide-gray-100"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                                <h3 class="font-serif text-lg font-bold text-gray-800 mb-4">Resumo por Categoria</h3>
+                                <div id="resumoSaidas" class="space-y-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- RELATÓRIOS SECTION -->
+                <section id="relatorios" class="section-content hidden fade-in">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <h3 class="font-serif text-lg font-bold text-gray-800 mb-4">Exportar Dados</h3>
+                            <div class="space-y-3">
+                                <button onclick="exportarExcel()" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                    <i class="fas fa-file-excel"></i>
+                                    Exportar para Excel
+                                </button>
+                                <button onclick="exportarPDF()" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                                    <i class="fas fa-file-pdf"></i>
+                                    Exportar Relatório PDF
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <h3 class="font-serif text-lg font-bold text-gray-800 mb-4">Filtros</h3>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Mês</label>
+                                    <select id="filtroMes" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-church-500">
+                                        <option value="todos">Todos</option>
+                                        <option value="0">Janeiro</option>
+                                        <option value="1">Fevereiro</option>
+                                        <option value="2">Março</option>
+                                        <option value="3">Abril</option>
+                                        <option value="4">Maio</option>
+                                        <option value="5">Junho</option>
+                                        <option value="6">Julho</option>
+                                        <option value="7">Agosto</option>
+                                        <option value="8">Setembro</option>
+                                        <option value="9">Outubro</option>
+                                        <option value="10">Novembro</option>
+                                        <option value="11">Dezembro</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Ano</label>
+                                    <select id="filtroAno" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-church-500">
+                                        <option value="2025">2025</option>
+                                        <option value="2026">2026</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button onclick="aplicarFiltro()" class="mt-3 w-full px-4 py-2 bg-church-600 text-white rounded-lg hover:bg-church-700 transition-colors">
+                                Aplicar Filtro
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <h3 class="font-serif text-lg font-bold text-gray-800 mb-4">Balanço Anual</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50 border-b border-gray-100">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Mês</th>
+                                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Entradas</th>
+                                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Saídas</th>
+                                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Saldo</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelaBalanco" class="divide-y divide-gray-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
     </div>
 
     <!-- Modal -->
@@ -602,60 +584,53 @@
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
-            <div class="p-6" id="modalContent">
-                <!-- Conteúdo dinâmico -->
-            </div>
+            <div class="p-6" id="modalContent"></div>
         </div>
     </div>
 
-    <!-- Toast Notification -->
+    <!-- Toast -->
     <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 transition-transform duration-300 z-50 flex items-center gap-2">
         <i class="fas fa-check-circle text-green-400"></i>
         <span id="toastMessage">Operação realizada com sucesso!</span>
     </div>
 
     <script>
-        // SISTEMA DE AUTENTICAÇÃO
-        const USUARIOS = {
-            'admin': { 
-                senha: 'Rcc2025!', 
-                nome: 'Coordenador', 
-                role: 'admin',
-                hash: btoa('Rcc2025!') // Simulação simples de hash
-            },
-            'visitante': { 
-                senha: 'ver2025', 
-                nome: 'Visitante', 
-                role: 'viewer',
-                hash: btoa('ver2025')
-            }
+        // CONFIGURAÇÕES
+        const CONFIG = {
+            adminUser: 'admin',
+            adminPass: 'Rcc2025!',
+            sessionTimeout: 30 * 60 * 1000 // 30 minutos
         };
 
+        // ESTADO GLOBAL
         let usuarioAtual = null;
-        let sessionTimeout = null;
+        let sessionTimer = null;
+        let anoAtualEntradas = 2025;
+        let anoAtualSaidas = 2025;
+        let anoAtualMembros = 2025;
 
-        // Dados iniciais baseados na planilha
+        // DADOS INICIAIS
         let dados = {
             membros: [
-                { id: 1, nome: 'CLAIR', pagamentos: { 10: 15, 11: 15 } },
-                { id: 2, nome: 'FRANCISCO', pagamentos: { 10: 15, 11: 15 } },
-                { id: 3, nome: 'GERALDO', pagamentos: { 7: 15, 8: 15, 9: 15, 10: 5 } },
-                { id: 4, nome: 'LEONICE', pagamentos: { 9: 10, 10: 15, 11: 15 } },
-                { id: 5, nome: 'LEOZELIA', pagamentos: { 10: 15, 11: 15 } },
-                { id: 6, nome: 'MARIA REGIANE KLIP', pagamentos: { 5: 10, 6: 10, 7: 10, 8: 10, 9: 10, 10: 10, 11: 10 } },
-                { id: 7, nome: 'MIGUEL PALCZUK', pagamentos: { 7: 15, 8: 15, 9: 15, 10: 15, 11: 10 } },
-                { id: 8, nome: 'ROSANE BERNARDINO', pagamentos: {} },
-                { id: 9, nome: 'ROSENI OLIVEIRA', pagamentos: { 7: 10, 8: 10, 9: 10, 10: 10, 11: 10 } },
-                { id: 10, nome: 'TEREZINHA AP. A. KWASNEY', pagamentos: { 10: 15, 11: 15 } },
-                { id: 11, nome: 'MARIA VERACY BATISTA MOREIRA', pagamentos: { 9: 10, 10: 10 } },
-                { id: 12, nome: 'NERCI TEREZINHA', pagamentos: {} },
-                { id: 13, nome: 'LOURIVAL LAERCIO LENZ', pagamentos: { 10: 10, 11: 10 } },
-                { id: 14, nome: 'CLEUSA LENZ', pagamentos: { 10: 10, 11: 10 } },
-                { id: 15, nome: 'CAROLINE K. CARNEIRO', pagamentos: { 0: 'X', 1: 'X', 2: 'X', 3: 'X', 4: 'X', 5: 'X', 7: 10, 8: 10, 9: 10, 10: 10 } },
-                { id: 16, nome: 'GABRIELA K. CARNEIRO', pagamentos: { 0: 'X', 1: 'X', 2: 'X', 3: 'X', 4: 'X', 5: 'X', 7: 10, 8: 10, 9: 10, 10: 10 } },
-                { id: 17, nome: 'VINICIUS', pagamentos: { 0: 'X', 7: 10, 8: 10, 9: 10, 10: 10, 11: 10 } },
-                { id: 18, nome: 'SUELEN', pagamentos: { 0: 'X', 7: 10, 8: 10, 9: 10, 10: 10, 11: 10 } },
-                { id: 19, nome: 'JEMERSON DANIEL RIBAS', pagamentos: { 0: 'X', 1: 'X', 2: 'X', 3: 'X', 4: 'X', 5: 'X', 6: 'X', 7: 'X', 9: 15, 10: 15 } }
+                { id: 1, nome: 'CLAIR', pagamentos: { 2025: { 10: 15, 11: 15 } } },
+                { id: 2, nome: 'FRANCISCO', pagamentos: { 2025: { 10: 15, 11: 15 } } },
+                { id: 3, nome: 'GERALDO', pagamentos: { 2025: { 7: 15, 8: 15, 9: 15, 10: 5 } } },
+                { id: 4, nome: 'LEONICE', pagamentos: { 2025: { 9: 10, 10: 15, 11: 15 } } },
+                { id: 5, nome: 'LEOZELIA', pagamentos: { 2025: { 10: 15, 11: 15 } } },
+                { id: 6, nome: 'MARIA REGIANE KLIP', pagamentos: { 2025: { 5: 10, 6: 10, 7: 10, 8: 10, 9: 10, 10: 10, 11: 10 } } },
+                { id: 7, nome: 'MIGUEL PALCZUK', pagamentos: { 2025: { 7: 15, 8: 15, 9: 15, 10: 15, 11: 10 } } },
+                { id: 8, nome: 'ROSANE BERNARDINO', pagamentos: { 2025: {} } },
+                { id: 9, nome: 'ROSENI OLIVEIRA', pagamentos: { 2025: { 7: 10, 8: 10, 9: 10, 10: 10, 11: 10 } } },
+                { id: 10, nome: 'TEREZINHA AP. A. KWASNEY', pagamentos: { 2025: { 10: 15, 11: 15 } } },
+                { id: 11, nome: 'MARIA VERACY BATISTA MOREIRA', pagamentos: { 2025: { 9: 10, 10: 10 } } },
+                { id: 12, nome: 'NERCI TEREZINHA', pagamentos: { 2025: {} } },
+                { id: 13, nome: 'LOURIVAL LAERCIO LENZ', pagamentos: { 2025: { 10: 10, 11: 10 } } },
+                { id: 14, nome: 'CLEUSA LENZ', pagamentos: { 2025: { 10: 10, 11: 10 } } },
+                { id: 15, nome: 'CAROLINE K. CARNEIRO', pagamentos: { 2025: { 0: 'X', 1: 'X', 2: 'X', 3: 'X', 4: 'X', 5: 'X', 7: 10, 8: 10, 9: 10, 10: 10 } } },
+                { id: 16, nome: 'GABRIELA K. CARNEIRO', pagamentos: { 2025: { 0: 'X', 1: 'X', 2: 'X', 3: 'X', 4: 'X', 5: 'X', 7: 10, 8: 10, 9: 10, 10: 10 } } },
+                { id: 17, nome: 'VINICIUS', pagamentos: { 2025: { 0: 'X', 7: 10, 8: 10, 9: 10, 10: 10, 11: 10 } } },
+                { id: 18, nome: 'SUELEN', pagamentos: { 2025: { 0: 'X', 7: 10, 8: 10, 9: 10, 10: 10, 11: 10 } } },
+                { id: 19, nome: 'JEMERSON DANIEL RIBAS', pagamentos: { 2025: { 0: 'X', 1: 'X', 2: 'X', 3: 'X', 4: 'X', 5: 'X', 6: 'X', 7: 'X', 9: 15, 10: 15 } } }
             ],
             entradas: [
                 { id: 1, data: '2025-10-16', descricao: 'Coleta', categoria: 'Coleta', valor: 6 },
@@ -687,167 +662,170 @@
         };
 
         const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-        let currentSection = 'dashboard';
 
-        // Inicialização
+        // INICIALIZAÇÃO
         document.addEventListener('DOMContentLoaded', () => {
-            verificarSessao();
+            console.log('Sistema iniciado');
             carregarDados();
             atualizarData();
             
-            // Verificar sessão salva
-            const sessaoSalva = localStorage.getItem('rcc_financeiro_sessao');
-            if (sessaoSalva) {
-                const sessao = JSON.parse(sessaoSalva);
-                if (sessao.lembrar && USUARIOS[sessao.usuario]) {
-                    fazerLoginAutomatico(sessao.usuario);
+            // Verificar se há sessão salva
+            const sessao = localStorage.getItem('financas_sessao');
+            if (sessao) {
+                try {
+                    const dadosSessao = JSON.parse(sessao);
+                    if (dadosSessao.tipo === 'admin') {
+                        // Verificar se não expirou
+                        const agora = new Date().getTime();
+                        if (agora - dadosSessao.timestamp < CONFIG.sessionTimeout) {
+                            fazerLoginAdmin(true);
+                            return;
+                        }
+                    } else if (dadosSessao.tipo === 'visitante') {
+                        fazerLoginVisitante(true);
+                        return;
+                    }
+                } catch(e) {
+                    console.error('Erro ao restaurar sessão:', e);
                 }
             }
             
-            // Event listeners para timeout de sessão
-            document.addEventListener('mousemove', resetSessionTimeout);
-            document.addEventListener('keypress', resetSessionTimeout);
+            // Se não houver sessão válida, mostrar login
+            mostrarTelaLogin();
         });
 
-        function verificarSessao() {
-            if (!usuarioAtual) {
-                document.getElementById('loginScreen').classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            } else {
-                document.getElementById('loginScreen').classList.add('hidden');
-                document.body.style.overflow = '';
-            }
+        function mostrarTelaLogin() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mainContent').classList.add('hidden');
         }
 
-        function fazerLogin() {
-            const usuario = document.getElementById('loginUser').value.trim().toLowerCase();
-            const senha = document.getElementById('loginPass').value;
-            const lembrar = document.getElementById('lembrarMe').checked;
-            
-            if (!usuario || !senha) {
-                mostrarErroLogin('Preencha usuário e senha');
-                return;
-            }
-            
-            const userData = USUARIOS[usuario];
-            
-            if (userData && senha === userData.senha) {
-                // Login bem-sucedido
-                usuarioAtual = {
-                    usuario: usuario,
-                    nome: userData.nome,
-                    role: userData.role,
-                    loginTime: new Date().toISOString()
-                };
-                
-                if (lembrar) {
-                    localStorage.setItem('rcc_financeiro_sessao', JSON.stringify({
-                        usuario: usuario,
-                        lembrar: true
-                    }));
-                }
-                
-                // Configurar interface baseada na role
-                configurarPermissoes();
-                
-                // Esconder login
-                document.getElementById('loginScreen').classList.add('hidden');
-                document.body.style.overflow = '';
-                
-                // Atualizar UI
-                document.getElementById('userDisplay').textContent = userData.nome;
-                document.getElementById('roleDisplay').textContent = userData.role === 'admin' ? 'ADMIN' : 'VISUALIZADOR';
-                document.getElementById('roleDisplay').className = `ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold ${userData.role === 'admin' ? 'bg-gold-500 text-white' : 'bg-blue-500 text-white'}`;
-                
-                showToast(`Bem-vindo, ${userData.nome}!`);
-                renderizarTudo();
-                resetSessionTimeout();
-                
-            } else {
-                mostrarErroLogin('Usuário ou senha incorretos');
-                document.querySelector('.slide-in').classList.add('shake');
-                setTimeout(() => {
-                    document.querySelector('.slide-in').classList.remove('shake');
-                }, 500);
-            }
-        }
-
-        function fazerLoginAutomatico(usuario) {
-            const userData = USUARIOS[usuario];
-            usuarioAtual = {
-                usuario: usuario,
-                nome: userData.nome,
-                role: userData.role,
-                loginTime: new Date().toISOString()
-            };
-            configurarPermissoes();
+        function mostrarTelaPrincipal() {
             document.getElementById('loginScreen').classList.add('hidden');
-            document.body.style.overflow = '';
-            document.getElementById('userDisplay').textContent = userData.nome;
-            document.getElementById('roleDisplay').textContent = userData.role === 'admin' ? 'ADMIN' : 'VISUALIZADOR';
-            document.getElementById('roleDisplay').className = `ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold ${userData.role === 'admin' ? 'bg-gold-500 text-white' : 'bg-blue-500 text-white'}`;
+            document.getElementById('mainContent').classList.remove('hidden');
             renderizarTudo();
         }
 
-        function mostrarErroLogin(msg) {
-            const erro = document.getElementById('loginError');
-            erro.querySelector('span').textContent = msg;
-            erro.classList.remove('hidden');
-            setTimeout(() => erro.classList.add('hidden'), 5000);
+        // FUNÇÕES DE LOGIN
+        function fazerLoginAdmin(silencioso = false) {
+            const user = document.getElementById('loginUser').value.trim();
+            const pass = document.getElementById('loginPass').value;
+            
+            if (!silencioso) {
+                if (!user || !pass) {
+                    mostrarErro('Preencha usuário e senha');
+                    return;
+                }
+                
+                if (user !== CONFIG.adminUser || pass !== CONFIG.adminPass) {
+                    mostrarErro('Usuário ou senha incorretos');
+                    document.querySelector('.slide-in').classList.add('shake');
+                    setTimeout(() => document.querySelector('.slide-in').classList.remove('shake'), 500);
+                    return;
+                }
+            }
+            
+            usuarioAtual = {
+                tipo: 'admin',
+                nome: 'Administrador',
+                loginTime: new Date().getTime()
+            };
+            
+            // Salvar sessão
+            localStorage.setItem('financas_sessao', JSON.stringify({
+                tipo: 'admin',
+                timestamp: new Date().getTime()
+            }));
+            
+            configurarInterface();
+            mostrarTelaPrincipal();
+            
+            if (!silencioso) {
+                showToast('Bem-vindo, Administrador!');
+            }
+            
+            iniciarTimerSessao();
         }
 
-        function configurarPermissoes() {
-            const isAdmin = usuarioAtual.role === 'admin';
+        function fazerLoginVisitante(silencioso = false) {
+            usuarioAtual = {
+                tipo: 'visitante',
+                nome: 'Visitante',
+                loginTime: new Date().getTime()
+            };
             
-            // Mostrar/ocultar elementos admin-only
+            // Salvar sessão
+            localStorage.setItem('financas_sessao', JSON.stringify({
+                tipo: 'visitante',
+                timestamp: new Date().getTime()
+            }));
+            
+            configurarInterface();
+            mostrarTelaPrincipal();
+            
+            if (!silencioso) {
+                showToast('Modo visualização ativado');
+            }
+        }
+
+        function mostrarErro(msg) {
+            const erroDiv = document.getElementById('loginError');
+            document.getElementById('loginErrorText').textContent = msg;
+            erroDiv.classList.remove('hidden');
+            setTimeout(() => erroDiv.classList.add('hidden'), 5000);
+        }
+
+        function configurarInterface() {
+            const isAdmin = usuarioAtual.tipo === 'admin';
+            
+            // Atualizar sidebar
+            document.getElementById('userDisplay').textContent = usuarioAtual.nome;
+            const roleDisplay = document.getElementById('roleDisplay');
+            roleDisplay.textContent = isAdmin ? 'ADMIN' : 'VISUALIZADOR';
+            roleDisplay.className = `ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold ${isAdmin ? 'bg-gold-500 text-white' : 'bg-blue-500 text-white'}`;
+            
+            // Mostrar/ocultar elementos admin
             document.querySelectorAll('.admin-only').forEach(el => {
                 if (isAdmin) {
                     el.classList.remove('hidden');
-                    el.disabled = false;
                 } else {
                     el.classList.add('hidden');
-                    el.disabled = true;
                 }
             });
             
-            // Mostrar badge de visualizador
-            if (!isAdmin) {
-                document.getElementById('readOnlyBadge').classList.remove('hidden');
-                document.getElementById('viewerAlert').classList.remove('hidden');
+            // Badge de visualização
+            const badge = document.getElementById('readOnlyBadge');
+            const alerta = document.getElementById('viewerAlert');
+            
+            if (isAdmin) {
+                badge.classList.add('hidden');
+                alerta.classList.add('hidden');
             } else {
-                document.getElementById('readOnlyBadge').classList.add('hidden');
-                document.getElementById('viewerAlert').classList.add('hidden');
+                badge.classList.remove('hidden');
+                alerta.classList.remove('hidden');
             }
         }
 
         function fazerLogout() {
-            if (confirm('Tem certeza que deseja sair do sistema?')) {
+            if (confirm('Deseja realmente sair?')) {
                 usuarioAtual = null;
-                localStorage.removeItem('rcc_financeiro_sessao');
-                clearTimeout(sessionTimeout);
+                localStorage.removeItem('financas_sessao');
+                clearTimeout(sessionTimer);
                 
-                // Limpar campos de login
+                // Limpar campos
                 document.getElementById('loginUser').value = '';
                 document.getElementById('loginPass').value = '';
-                document.getElementById('lembrarMe').checked = false;
                 
-                // Mostrar tela de login
-                document.getElementById('loginScreen').classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-                
-                showToast('Logout realizado com sucesso');
+                mostrarTelaLogin();
+                showToast('Logout realizado');
             }
         }
 
-        function resetSessionTimeout() {
-            if (sessionTimeout) clearTimeout(sessionTimeout);
-            if (usuarioAtual) {
-                // 30 minutos de inatividade
-                sessionTimeout = setTimeout(() => {
-                    alert('Sessão expirada por inatividade. Faça login novamente.');
-                    fazerLogout();
-                }, 30 * 60 * 1000);
-            }
+        function iniciarTimerSessao() {
+            if (sessionTimer) clearTimeout(sessionTimer);
+            sessionTimer = setTimeout(() => {
+                alert('Sessão expirada por inatividade.');
+                fazerLogout();
+            }, CONFIG.sessionTimeout);
         }
 
         function togglePassword() {
@@ -865,8 +843,20 @@
             }
         }
 
-        function mostrarAjuda() {
-            alert('Credenciais de acesso:\n\n👤 Administrador:\n   Usuário: admin\n   Senha: Rcc2025!\n\n👁️ Visualizador:\n   Usuário: visitante\n   Senha: ver2025\n\nO modo visualizador permite apenas consultar dados, sem editar.');
+        // FUNÇÕES DE DADOS
+        function carregarDados() {
+            const salvos = localStorage.getItem('financas_dados');
+            if (salvos) {
+                try {
+                    dados = JSON.parse(salvos);
+                } catch(e) {
+                    console.error('Erro ao carregar dados:', e);
+                }
+            }
+        }
+
+        function salvarDados() {
+            localStorage.setItem('financas_dados', JSON.stringify(dados));
         }
 
         function atualizarData() {
@@ -874,63 +864,91 @@
             document.getElementById('currentDate').textContent = new Date().toLocaleDateString('pt-BR', options);
         }
 
-        function carregarDados() {
-            const salvos = localStorage.getItem('rcc_financeiro_dados');
-            if (salvos) {
-                dados = JSON.parse(salvos);
-            } else {
-                salvarDados();
-            }
-        }
-
-        function salvarDados() {
-            localStorage.setItem('rcc_financeiro_dados', JSON.stringify(dados));
-        }
-
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('-translate-x-full');
-        }
-
-        function showSection(sectionName) {
-            if (!usuarioAtual) return;
-            
-            document.querySelectorAll('.section-content').forEach(section => {
-                section.classList.add('hidden');
-            });
-            
-            document.getElementById(sectionName).classList.remove('hidden');
-            
-            const titulos = {
-                'dashboard': 'Dashboard',
-                'membros': 'Controle de Mensalidades',
-                'entradas': 'Entradas',
-                'saidas': 'Saídas',
-                'relatorios': 'Relatórios'
-            };
-            document.getElementById('pageTitle').textContent = titulos[sectionName];
-            
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('bg-church-800');
-            });
-            event.target.closest('.nav-btn').classList.add('bg-church-800');
-            
-            currentSection = sectionName;
-            
-            if (window.innerWidth < 768) {
-                document.getElementById('sidebar').classList.add('-translate-x-full');
-            }
-            
-            renderizarTudo();
-        }
-
+        // RENDERIZAÇÃO
         function renderizarTudo() {
             if (!usuarioAtual) return;
+            
             atualizarDashboard();
+            renderizarAbasAnos();
             renderizarMembros();
             renderizarEntradas();
             renderizarSaidas();
             renderizarBalanco();
+        }
+
+        function obterAnosDisponiveis() {
+            const anos = new Set([2025, 2026, new Date().getFullYear()]);
+            
+            dados.entradas.forEach(e => {
+                const ano = new Date(e.data).getFullYear();
+                anos.add(ano);
+            });
+            
+            dados.saidas.forEach(s => {
+                const ano = new Date(s.data).getFullYear();
+                anos.add(ano);
+            });
+            
+            dados.membros.forEach(m => {
+                Object.keys(m.pagamentos).forEach(ano => anos.add(parseInt(ano)));
+            });
+            
+            return Array.from(anos).sort((a, b) => b - a);
+        }
+
+        function renderizarAbasAnos() {
+            const anos = obterAnosDisponiveis();
+            
+            // Entradas
+            const containerEntradas = document.getElementById('abasAnosEntradas');
+            if (containerEntradas) {
+                containerEntradas.innerHTML = anos.map(ano => `
+                    <button onclick="mudarAnoEntradas(${ano})" 
+                            class="ano-tab px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap ${ano === anoAtualEntradas ? 'active' : 'bg-white text-gray-600 border border-gray-200'}">
+                        ${ano}
+                    </button>
+                `).join('');
+            }
+            
+            // Saídas
+            const containerSaidas = document.getElementById('abasAnosSaidas');
+            if (containerSaidas) {
+                containerSaidas.innerHTML = anos.map(ano => `
+                    <button onclick="mudarAnoSaidas(${ano})" 
+                            class="ano-tab px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap ${ano === anoAtualSaidas ? 'active' : 'bg-white text-gray-600 border border-gray-200'}">
+                        ${ano}
+                    </button>
+                `).join('');
+            }
+            
+            // Membros
+            const containerMembros = document.getElementById('abasAnosMembros');
+            if (containerMembros) {
+                containerMembros.innerHTML = anos.map(ano => `
+                    <button onclick="mudarAnoMembros(${ano})" 
+                            class="ano-tab px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap ${ano === anoAtualMembros ? 'active' : 'bg-white text-gray-600 border border-gray-200'}">
+                        ${ano}
+                    </button>
+                `).join('');
+            }
+        }
+
+        function mudarAnoEntradas(ano) {
+            anoAtualEntradas = ano;
+            renderizarAbasAnos();
+            renderizarEntradas();
+        }
+
+        function mudarAnoSaidas(ano) {
+            anoAtualSaidas = ano;
+            renderizarAbasAnos();
+            renderizarSaidas();
+        }
+
+        function mudarAnoMembros(ano) {
+            anoAtualMembros = ano;
+            renderizarAbasAnos();
+            renderizarMembros();
         }
 
         function atualizarDashboard() {
@@ -945,21 +963,35 @@
             const mesAtual = hoje.getMonth();
             const anoAtual = hoje.getFullYear();
             
-            const entradasMes = dados.entradas
-                .filter(e => new Date(e.data).getMonth() === mesAtual && new Date(e.data).getFullYear() === anoAtual)
+            // Entradas do mês (normais + mensalidades)
+            let entradasMes = dados.entradas
+                .filter(e => {
+                    const data = new Date(e.data);
+                    return data.getMonth() === mesAtual && data.getFullYear() === anoAtual;
+                })
                 .reduce((acc, e) => acc + e.valor, 0);
-                
+            
+            // Adicionar mensalidades do mês
+            const mensalidadesMes = calcularMensalidadesMes(mesAtual, anoAtual);
+            entradasMes += mensalidadesMes;
+            
             const saidasMes = dados.saidas
-                .filter(s => new Date(s.data).getMonth() === mesAtual && new Date(s.data).getFullYear() === anoAtual)
+                .filter(s => {
+                    const data = new Date(s.data);
+                    return data.getMonth() === mesAtual && data.getFullYear() === anoAtual;
+                })
                 .reduce((acc, s) => acc + s.valor, 0);
             
             document.getElementById('cardEntradas').textContent = formatarMoeda(entradasMes);
             document.getElementById('cardSaidas').textContent = formatarMoeda(saidasMes);
             
+            // Estatísticas mensalidades
             let totalPagantes = 0;
             let totalDevido = 0;
+            
             dados.membros.forEach(membro => {
-                const pagamento = membro.pagamentos[mesAtual];
+                const pagamentosAno = membro.pagamentos[anoAtual] || {};
+                const pagamento = pagamentosAno[mesAtual];
                 if (pagamento && (pagamento === 'X' || pagamento > 0)) {
                     totalPagantes++;
                 }
@@ -970,84 +1002,202 @@
             const percentual = totalDevido > 0 ? (totalPagantes / totalDevido) * 100 : 0;
             document.getElementById('barMensalidades').style.width = `${percentual}%`;
             
-            const todasTransacoes = [
-                ...dados.entradas.map(e => ({...e, tipo: 'entrada'})),
-                ...dados.saidas.map(s => ({...s, tipo: 'saida'}))
-            ].sort((a, b) => new Date(b.data) - new Date(a.data)).slice(0, 10);
+            // Últimas transações
+            renderizarUltimasTransacoes();
             
-            const containerTransacoes = document.getElementById('ultimasTransacoes');
-            containerTransacoes.innerHTML = todasTransacoes.map(t => `
-                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full ${t.tipo === 'entrada' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'} flex items-center justify-center">
-                            <i class="fas fa-${t.tipo === 'entrada' ? 'arrow-down' : 'arrow-up'}"></i>
-                        </div>
-                        <div>
-                            <p class="font-medium text-sm text-gray-800">${t.descricao}</p>
-                            <p class="text-xs text-gray-500">${formatarData(t.data)}</p>
-                        </div>
-                    </div>
-                    <span class="font-bold ${t.tipo === 'entrada' ? 'text-green-600' : 'text-red-600'}">
-                        ${t.tipo === 'entrada' ? '+' : '-'} ${formatarMoeda(t.valor)}
-                    </span>
-                </div>
-            `).join('');
-            
+            // Gráfico
             desenharGrafico();
+        }
+
+        function calcularMensalidadesMes(mes, ano) {
+            let total = 0;
+            dados.membros.forEach(membro => {
+                const pagamentosAno = membro.pagamentos[ano] || {};
+                const valor = pagamentosAno[mes];
+                if (valor && valor !== 'X') {
+                    total += parseFloat(valor) || 0;
+                }
+            });
+            return total;
+        }
+
+        function renderizarUltimasTransacoes() {
+            const transacoes = [];
+            
+            // Entradas normais
+            dados.entradas.forEach(e => {
+                transacoes.push({
+                    tipo: 'entrada',
+                    data: e.data,
+                    descricao: e.descricao,
+                    valor: e.valor,
+                    categoria: e.categoria,
+                    dataObj: new Date(e.data)
+                });
+            });
+            
+            // Saídas
+            dados.saidas.forEach(s => {
+                transacoes.push({
+                    tipo: 'saida',
+                    data: s.data,
+                    descricao: s.descricao,
+                    valor: s.valor,
+                    categoria: s.categoria,
+                    dataObj: new Date(s.data)
+                });
+            });
+            
+            // Mensalidades
+            dados.membros.forEach(membro => {
+                Object.entries(membro.pagamentos).forEach(([ano, pagamentos]) => {
+                    Object.entries(pagamentos).forEach(([mes, valor]) => {
+                        if (valor && valor !== 'X') {
+                            const dataPagamento = new Date(parseInt(ano), parseInt(mes), 15);
+                            transacoes.push({
+                                tipo: 'mensalidade',
+                                data: dataPagamento.toISOString().split('T')[0],
+                                descricao: `Mensalidade - ${membro.nome}`,
+                                valor: parseFloat(valor),
+                                categoria: 'Mensalidade',
+                                dataObj: dataPagamento,
+                                membro: membro.nome
+                            });
+                        }
+                    });
+                });
+            });
+            
+            // Ordenar e pegar últimas 15
+            transacoes.sort((a, b) => b.dataObj - a.dataObj);
+            const ultimas = transacoes.slice(0, 15);
+            
+            const container = document.getElementById('ultimasTransacoes');
+            container.innerHTML = ultimas.map(t => {
+                let config = {};
+                
+                switch(t.tipo) {
+                    case 'entrada':
+                        config = { icon: 'fa-arrow-down', bg: 'bg-green-100', text: 'text-green-600', prefix: '+' };
+                        break;
+                    case 'saida':
+                        config = { icon: 'fa-arrow-up', bg: 'bg-red-100', text: 'text-red-600', prefix: '-' };
+                        break;
+                    case 'mensalidade':
+                        config = { icon: 'fa-user-check', bg: 'bg-gold-100', text: 'text-gold-600', prefix: '+' };
+                        break;
+                }
+                
+                return `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="w-10 h-10 rounded-full ${config.bg} ${config.text} flex items-center justify-center flex-shrink-0">
+                                <i class="fas ${config.icon}"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="font-medium text-sm text-gray-800 truncate">${t.descricao}</p>
+                                <p class="text-xs text-gray-500">${formatarData(t.data)} • ${t.categoria}</p>
+                            </div>
+                        </div>
+                        <span class="font-bold ${config.text} whitespace-nowrap ml-2">
+                            ${config.prefix} ${formatarMoeda(t.valor)}
+                        </span>
+                    </div>
+                `;
+            }).join('');
         }
 
         function desenharGrafico() {
             const canvas = document.getElementById('financeChart');
+            if (!canvas) return;
+            
             const ctx = canvas.getContext('2d');
             const width = canvas.width;
             const height = canvas.height;
             
             ctx.clearRect(0, 0, width, height);
             
+            const hoje = new Date();
             const mesesDados = {};
-            for (let i = 0; i < 6; i++) {
-                mesesDados[i] = { entradas: 0, saidas: 0 };
+            
+            // Últimos 6 meses
+            for (let i = 5; i >= 0; i--) {
+                const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+                const key = `${d.getFullYear()}-${d.getMonth()}`;
+                mesesDados[key] = {
+                    mes: d.getMonth(),
+                    ano: d.getFullYear(),
+                    entradas: 0,
+                    saidas: 0,
+                    label: meses[d.getMonth()]
+                };
             }
             
+            // Entradas normais
             dados.entradas.forEach(e => {
                 const data = new Date(e.data);
-                const mes = data.getMonth();
-                if (mesesDados[mes] !== undefined) mesesDados[mes].entradas += e.valor;
+                const key = `${data.getFullYear()}-${data.getMonth()}`;
+                if (mesesDados[key]) {
+                    mesesDados[key].entradas += e.valor;
+                }
             });
             
+            // Mensalidades
+            dados.membros.forEach(membro => {
+                Object.entries(membro.pagamentos).forEach(([ano, pagamentos]) => {
+                    Object.entries(pagamentos).forEach(([mes, valor]) => {
+                        if (valor && valor !== 'X') {
+                            const key = `${ano}-${mes}`;
+                            if (mesesDados[key]) {
+                                mesesDados[key].entradas += parseFloat(valor) || 0;
+                            }
+                        }
+                    });
+                });
+            });
+            
+            // Saídas
             dados.saidas.forEach(s => {
                 const data = new Date(s.data);
-                const mes = data.getMonth();
-                if (mesesDados[mes] !== undefined) mesesDados[mes].saidas += s.valor;
+                const key = `${data.getFullYear()}-${data.getMonth()}`;
+                if (mesesDados[key]) {
+                    mesesDados[key].saidas += s.valor;
+                }
             });
             
-            const maxVal = Math.max(...Object.values(mesesDados).map(m => Math.max(m.entradas, m.saidas))) || 100;
-            const barWidth = width / 12;
+            const valores = Object.values(mesesDados);
+            const maxVal = Math.max(...valores.map(m => Math.max(m.entradas, m.saidas)), 100);
+            const barWidth = width / (valores.length * 3);
             const scale = (height - 40) / maxVal;
             
-            Object.keys(mesesDados).forEach((mes, index) => {
-                const x = index * (barWidth * 2) + 20;
-                const entradasH = mesesDados[mes].entradas * scale;
-                const saidasH = mesesDados[mes].saidas * scale;
+            valores.forEach((m, index) => {
+                const x = index * (barWidth * 3) + 30;
+                const entradasH = m.entradas * scale;
+                const saidasH = m.saidas * scale;
                 
+                // Entradas (verde)
                 ctx.fillStyle = '#10b981';
-                ctx.fillRect(x, height - entradasH - 20, barWidth - 5, entradasH);
+                ctx.fillRect(x, height - entradasH - 20, barWidth - 2, entradasH);
                 
+                // Saídas (vermelho)
                 ctx.fillStyle = '#ef4444';
-                ctx.fillRect(x + barWidth, height - saidasH - 20, barWidth - 5, saidasH);
+                ctx.fillRect(x + barWidth + 2, height - saidasH - 20, barWidth - 2, saidasH);
                 
+                // Label
                 ctx.fillStyle = '#6b7280';
-                ctx.font = '10px Inter';
-                ctx.fillText(meses[mes], x + 5, height - 5);
+                ctx.font = '11px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText(m.label, x + barWidth, height - 5);
             });
         }
 
         function renderizarMembros() {
             const tbody = document.getElementById('tabelaMembros');
-            const isAdmin = usuarioAtual && usuarioAtual.role === 'admin';
+            const isAdmin = usuarioAtual && usuarioAtual.tipo === 'admin';
             
             tbody.innerHTML = dados.membros.map(membro => {
-                const total = Object.values(membro.pagamentos).reduce((acc, val) => {
+                const pagamentosAno = membro.pagamentos[anoAtualMembros] || {};
+                const total = Object.values(pagamentosAno).reduce((acc, val) => {
                     return acc + (val === 'X' ? 0 : (parseFloat(val) || 0));
                 }, 0);
                 
@@ -1055,7 +1205,7 @@
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">${membro.nome}</td>
                         ${meses.map((_, idx) => {
-                            const val = membro.pagamentos[idx];
+                            const val = pagamentosAno[idx];
                             let display = '';
                             let bgClass = 'bg-gray-50 text-gray-400';
                             
@@ -1067,7 +1217,7 @@
                                 bgClass = 'bg-green-100 text-green-700';
                             }
                             
-                            const clickAction = isAdmin ? `onclick="editarPagamento(${membro.id}, ${idx})"` : '';
+                            const clickAction = isAdmin ? `onclick="editarPagamento(${membro.id}, ${idx}, ${anoAtualMembros})"` : '';
                             const cursorClass = isAdmin ? 'cursor-pointer hover:opacity-80' : 'cursor-default';
                             
                             return `
@@ -1095,9 +1245,14 @@
 
         function renderizarEntradas() {
             const tbody = document.getElementById('tabelaEntradas');
-            const isAdmin = usuarioAtual && usuarioAtual.role === 'admin';
+            const isAdmin = usuarioAtual && usuarioAtual.tipo === 'admin';
             
-            tbody.innerHTML = dados.entradas.sort((a, b) => new Date(b.data) - new Date(a.data)).map(e => `
+            const entradasAno = dados.entradas.filter(e => {
+                const ano = new Date(e.data).getFullYear();
+                return ano === anoAtualEntradas;
+            });
+            
+            tbody.innerHTML = entradasAno.sort((a, b) => new Date(b.data) - new Date(a.data)).map(e => `
                 <tr class="hover:bg-gray-50">
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatarData(e.data)}</td>
                     <td class="px-6 py-4 text-sm text-gray-900">${e.descricao}</td>
@@ -1113,8 +1268,9 @@
                 </tr>
             `).join('');
             
+            // Resumo por categoria
             const categorias = {};
-            dados.entradas.forEach(e => {
+            entradasAno.forEach(e => {
                 categorias[e.categoria] = (categorias[e.categoria] || 0) + e.valor;
             });
             
@@ -1131,9 +1287,14 @@
 
         function renderizarSaidas() {
             const tbody = document.getElementById('tabelaSaidas');
-            const isAdmin = usuarioAtual && usuarioAtual.role === 'admin';
+            const isAdmin = usuarioAtual && usuarioAtual.tipo === 'admin';
             
-            tbody.innerHTML = dados.saidas.sort((a, b) => new Date(b.data) - new Date(a.data)).map(s => `
+            const saidasAno = dados.saidas.filter(s => {
+                const ano = new Date(s.data).getFullYear();
+                return ano === anoAtualSaidas;
+            });
+            
+            tbody.innerHTML = saidasAno.sort((a, b) => new Date(b.data) - new Date(a.data)).map(s => `
                 <tr class="hover:bg-gray-50">
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatarData(s.data)}</td>
                     <td class="px-6 py-4 text-sm text-gray-900">${s.descricao}</td>
@@ -1149,8 +1310,9 @@
                 </tr>
             `).join('');
             
+            // Resumo por categoria
             const categorias = {};
-            dados.saidas.forEach(s => {
+            saidasAno.forEach(s => {
                 categorias[s.categoria] = (categorias[s.categoria] || 0) + s.valor;
             });
             
@@ -1174,11 +1336,24 @@
                 balancoMensal[i] = { entradas: 0, saidas: 0 };
             }
             
+            // Entradas normais
             dados.entradas.forEach(e => {
                 const mes = new Date(e.data).getMonth();
                 balancoMensal[mes].entradas += e.valor;
             });
             
+            // Mensalidades
+            dados.membros.forEach(membro => {
+                Object.entries(membro.pagamentos).forEach(([ano, pagamentos]) => {
+                    Object.entries(pagamentos).forEach(([mes, valor]) => {
+                        if (valor && valor !== 'X') {
+                            balancoMensal[mes].entradas += parseFloat(valor) || 0;
+                        }
+                    });
+                });
+            });
+            
+            // Saídas
             dados.saidas.forEach(s => {
                 const mes = new Date(s.data).getMonth();
                 balancoMensal[mes].saidas += s.valor;
@@ -1199,8 +1374,9 @@
             }).join('');
         }
 
+        // MODAIS E AÇÕES
         function openModal(type) {
-            if (!usuarioAtual || usuarioAtual.role !== 'admin') {
+            if (!usuarioAtual || usuarioAtual.tipo !== 'admin') {
                 showToast('Apenas administradores podem adicionar registros');
                 return;
             }
@@ -1212,13 +1388,15 @@
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             
+            const hoje = new Date();
+            
             if (type === 'membro') {
                 title.textContent = 'Novo Membro';
                 content.innerHTML = `
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Membro</label>
-                            <input type="text" id="nomeMembro" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-church-500 focus:border-church-500" placeholder="Digite o nome completo">
+                            <input type="text" id="nomeMembro" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-church-500" placeholder="Digite o nome completo">
                         </div>
                         <button onclick="salvarMembro()" class="w-full py-2 bg-church-600 text-white rounded-lg hover:bg-church-700 transition-colors font-medium">
                             Salvar Membro
@@ -1231,7 +1409,7 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Data</label>
-                            <input type="date" id="dataEntrada" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" value="${new Date().toISOString().split('T')[0]}">
+                            <input type="date" id="dataEntrada" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" value="${hoje.toISOString().split('T')[0]}">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
@@ -1262,7 +1440,7 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Data</label>
-                            <input type="date" id="dataSaida" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500" value="${new Date().toISOString().split('T')[0]}">
+                            <input type="date" id="dataSaida" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500" value="${hoje.toISOString().split('T')[0]}">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
@@ -1271,7 +1449,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
                             <select id="catSaida" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500">
-                                <option value="Mensalidade">Mensalidade RCC</option>
+                                <option value="Mensalidade">Mensalidade</option>
                                 <option value="Compra">Compra</option>
                                 <option value="Doação">Doação</option>
                                 <option value="Ajuda">Ajuda</option>
@@ -1299,8 +1477,6 @@
         }
 
         function salvarMembro() {
-            if (!usuarioAtual || usuarioAtual.role !== 'admin') return;
-            
             const nome = document.getElementById('nomeMembro').value;
             if (!nome) return alert('Digite o nome do membro');
             
@@ -1308,7 +1484,7 @@
             dados.membros.push({
                 id: novoId,
                 nome: nome,
-                pagamentos: {}
+                pagamentos: { 2025: {} }
             });
             
             salvarDados();
@@ -1318,8 +1494,6 @@
         }
 
         function salvarEntrada() {
-            if (!usuarioAtual || usuarioAtual.role !== 'admin') return;
-            
             const data = document.getElementById('dataEntrada').value;
             const descricao = document.getElementById('descEntrada').value;
             const categoria = document.getElementById('catEntrada').value;
@@ -1337,8 +1511,6 @@
         }
 
         function salvarSaida() {
-            if (!usuarioAtual || usuarioAtual.role !== 'admin') return;
-            
             const data = document.getElementById('dataSaida').value;
             const descricao = document.getElementById('descSaida').value;
             const categoria = document.getElementById('catSaida').value;
@@ -1355,31 +1527,28 @@
             showToast('Saída registrada com sucesso!');
         }
 
-        function editarPagamento(membroId, mes) {
-            if (!usuarioAtual || usuarioAtual.role !== 'admin') {
-                showToast('Apenas administradores podem editar pagamentos');
-                return;
-            }
-            
+        function editarPagamento(membroId, mes, ano) {
             const membro = dados.membros.find(m => m.id === membroId);
-            const valorAtual = membro.pagamentos[mes] || '';
+            if (!membro.pagamentos[ano]) {
+                membro.pagamentos[ano] = {};
+            }
+            const valorAtual = membro.pagamentos[ano][mes] || '';
             
-            const novoValor = prompt(`Pagamento de ${membro.nome} para ${meses[mes]}:`, valorAtual);
+            const novoValor = prompt(`Pagamento de ${membro.nome} para ${meses[mes]}/${ano}:`, valorAtual);
             if (novoValor !== null) {
                 if (novoValor === '' || novoValor === '0') {
-                    delete membro.pagamentos[mes];
+                    delete membro.pagamentos[ano][mes];
                 } else {
-                    membro.pagamentos[mes] = novoValor === 'X' ? 'X' : parseFloat(novoValor);
+                    membro.pagamentos[ano][mes] = novoValor === 'X' ? 'X' : parseFloat(novoValor);
                 }
                 salvarDados();
                 renderizarMembros();
+                atualizarDashboard();
                 showToast('Pagamento atualizado!');
             }
         }
 
         function excluirMembro(id) {
-            if (!usuarioAtual || usuarioAtual.role !== 'admin') return;
-            
             if (confirm('Tem certeza que deseja excluir este membro?')) {
                 dados.membros = dados.membros.filter(m => m.id !== id);
                 salvarDados();
@@ -1389,8 +1558,6 @@
         }
 
         function excluirEntrada(id) {
-            if (!usuarioAtual || usuarioAtual.role !== 'admin') return;
-            
             if (confirm('Tem certeza que deseja excluir esta entrada?')) {
                 dados.entradas = dados.entradas.filter(e => e.id !== id);
                 salvarDados();
@@ -1400,14 +1567,43 @@
         }
 
         function excluirSaida(id) {
-            if (!usuarioAtual || usuarioAtual.role !== 'admin') return;
-            
             if (confirm('Tem certeza que deseja excluir esta saída?')) {
                 dados.saidas = dados.saidas.filter(s => s.id !== id);
                 salvarDados();
                 renderizarTudo();
                 showToast('Saída removida!');
             }
+        }
+
+        // UTILITÁRIOS
+        function showSection(sectionName) {
+            document.querySelectorAll('.section-content').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            document.getElementById(sectionName).classList.remove('hidden');
+            
+            const titulos = {
+                'dashboard': 'Dashboard',
+                'membros': 'Mensalidades',
+                'entradas': 'Entradas',
+                'saidas': 'Saídas',
+                'relatorios': 'Relatórios'
+            };
+            document.getElementById('pageTitle').textContent = titulos[sectionName];
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-church-800');
+            });
+            event.target.closest('.nav-btn').classList.add('bg-church-800');
+            
+            if (window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
         }
 
         function showToast(message) {
@@ -1431,27 +1627,17 @@
         }
 
         function backupData() {
-            if (!usuarioAtual || usuarioAtual.role !== 'admin') {
-                showToast('Apenas administradores podem fazer backup');
-                return;
-            }
-            
             const dataStr = JSON.stringify(dados, null, 2);
             const blob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `backup_rcc_financeiro_${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `backup_financeiro_${new Date().toISOString().split('T')[0]}.json`;
             a.click();
-            showToast('Backup baixado com sucesso!');
+            showToast('Backup baixado!');
         }
 
         function restoreData(input) {
-            if (!usuarioAtual || usuarioAtual.role !== 'admin') {
-                showToast('Apenas administradores podem restaurar dados');
-                return;
-            }
-            
             const file = input.files[0];
             if (!file) return;
             
@@ -1459,14 +1645,14 @@
             reader.onload = function(e) {
                 try {
                     const dadosRestaurados = JSON.parse(e.target.result);
-                    if (confirm('Isso substituirá todos os dados atuais. Deseja continuar?')) {
+                    if (confirm('Substituir dados atuais?')) {
                         dados = dadosRestaurados;
                         salvarDados();
                         renderizarTudo();
-                        showToast('Dados restaurados com sucesso!');
+                        showToast('Dados restaurados!');
                     }
                 } catch (err) {
-                    alert('Erro ao ler arquivo: ' + err.message);
+                    alert('Erro ao ler arquivo');
                 }
             };
             reader.readAsText(file);
@@ -1475,11 +1661,9 @@
 
         function exportarExcel() {
             let csv = 'Tipo,Data,Descrição,Categoria,Valor\n';
-            
             dados.entradas.forEach(e => {
                 csv += `Entrada,${e.data},${e.descricao},${e.categoria},${e.valor}\n`;
             });
-            
             dados.saidas.forEach(s => {
                 csv += `Saída,${s.data},${s.descricao},${s.categoria},${s.valor}\n`;
             });
@@ -1488,28 +1672,28 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `relatorio_rcc_${new Date().toISOString().split('T')[0]}.csv`;
+            a.download = `relatorio_${new Date().toISOString().split('T')[0]}.csv`;
             a.click();
-            showToast('Relatório exportado!');
+            showToast('Exportado!');
         }
 
         function exportarPDF() {
-            alert('Funcionalidade de PDF será implementada com biblioteca adicional. Por enquanto, use a exportação para Excel ou imprima a página (Ctrl+P).');
+            window.print();
         }
 
         function aplicarFiltro() {
             showToast('Filtro aplicado!');
         }
 
-        // Fechar modal ao clicar fora
+        // Event Listeners
         document.getElementById('modal').addEventListener('click', function(e) {
             if (e.target === this) closeModal();
         });
 
-        // Enter para login
-        document.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && !usuarioAtual) {
-                fazerLogin();
+        // Enter no login
+        document.getElementById('loginPass').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                fazerLoginAdmin();
             }
         });
     </script>
