@@ -50,6 +50,9 @@
         .gradient-gold {
             background: linear-gradient(135deg, #d4902a 0%, #edc67a 50%, #d4902a 100%);
         }
+        .gradient-church {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        }
         .card-hover {
             transition: all 0.3s ease;
         }
@@ -71,6 +74,14 @@
             from { transform: translateX(-100%); }
             to { transform: translateX(0); }
         }
+        .shake {
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
         /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
@@ -86,12 +97,115 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #b87620;
         }
+        .login-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #1e40af 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .login-bg::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            opacity: 0.3;
+        }
+        .readonly-mode {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        .readonly-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #fbbf24;
+            color: #92400e;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800">
 
+    <!-- TELA DE LOGIN -->
+    <div id="loginScreen" class="fixed inset-0 login-bg flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden slide-in">
+            <div class="bg-gradient-to-r from-church-800 to-church-600 p-8 text-center">
+                <div class="w-20 h-20 rounded-full gradient-gold mx-auto flex items-center justify-center text-white text-3xl mb-4 shadow-lg">
+                    <i class="fas fa-church"></i>
+                </div>
+                <h1 class="text-2xl font-serif font-bold text-white mb-2">RCC Finanças</h1>
+                <p class="text-church-100 text-sm">Grupo de Oração - Acesso Restrito</p>
+            </div>
+            
+            <div class="p-8">
+                <div id="loginError" class="hidden mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg text-sm flex items-center gap-2">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>Usuário ou senha incorretos!</span>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Usuário</label>
+                        <div class="relative">
+                            <i class="fas fa-user absolute left-3 top-3 text-gray-400"></i>
+                            <input type="text" id="loginUser" class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-church-500 focus:border-church-500 transition-all" placeholder="Digite seu usuário">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+                        <div class="relative">
+                            <i class="fas fa-lock absolute left-3 top-3 text-gray-400"></i>
+                            <input type="password" id="loginPass" class="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-church-500 focus:border-church-500 transition-all" placeholder="Digite sua senha">
+                            <button type="button" onclick="togglePassword()" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-eye" id="eyeIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between text-sm">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="lembrarMe" class="rounded text-church-600 focus:ring-church-500">
+                            <span class="text-gray-600">Lembrar-me</span>
+                        </label>
+                        <button onclick="mostrarAjuda()" class="text-church-600 hover:text-church-800 font-medium">Precisa de ajuda?</button>
+                    </div>
+
+                    <button onclick="fazerLogin()" class="w-full py-3 bg-gradient-to-r from-church-700 to-church-600 text-white rounded-lg hover:from-church-800 hover:to-church-700 transition-all font-medium shadow-lg transform hover:scale-[1.02]">
+                        Entrar no Sistema
+                    </button>
+                </div>
+
+                <div class="mt-6 pt-6 border-t border-gray-200 text-center">
+                    <p class="text-xs text-gray-500 mb-2">Níveis de Acesso:</p>
+                    <div class="flex justify-center gap-4 text-xs">
+                        <span class="flex items-center gap-1 text-green-600 font-medium">
+                            <i class="fas fa-shield-alt"></i> Admin: Edição total
+                        </span>
+                        <span class="flex items-center gap-1 text-blue-600 font-medium">
+                            <i class="fas fa-eye"></i> Visualizador: Apenas leitura
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BADGE MODO LEITURA -->
+    <div id="readOnlyBadge" class="readonly-badge hidden">
+        <i class="fas fa-eye mr-1"></i> Modo Visualização
+    </div>
+
     <!-- Sidebar -->
-    <div id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-church-900 text-white transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-50 shadow-2xl">
+    <div id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-church-900 text-white transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 shadow-2xl">
         <div class="p-6 border-b border-church-700">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full gradient-gold flex items-center justify-center text-white font-bold text-lg">
@@ -101,6 +215,11 @@
                     <h1 class="font-serif text-lg font-bold">RCC Finanças</h1>
                     <p class="text-xs text-gray-300">Grupo de Oração</p>
                 </div>
+            </div>
+            <div class="mt-4 flex items-center gap-2 text-xs text-gray-300 bg-church-800 rounded-lg p-2">
+                <i class="fas fa-user-circle"></i>
+                <span id="userDisplay">Usuário</span>
+                <span id="roleDisplay" class="ml-auto px-2 py-0.5 rounded-full bg-gold-500 text-white text-[10px] font-bold">ADMIN</span>
             </div>
         </div>
         
@@ -127,16 +246,20 @@
             </button>
         </nav>
 
-        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-church-700">
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-church-700 space-y-2">
             <div class="bg-church-800 rounded-lg p-3">
                 <p class="text-xs text-gray-300 mb-1">Saldo Atual</p>
                 <p class="text-xl font-bold text-gold-300" id="sidebarSaldo">R$ 0,00</p>
             </div>
+            <button onclick="fazerLogout()" class="w-full flex items-center gap-2 px-4 py-2 bg-red-600/20 text-red-300 rounded-lg hover:bg-red-600/30 transition-colors text-sm">
+                <i class="fas fa-sign-out-alt"></i>
+                Sair do Sistema
+            </button>
         </div>
     </div>
 
     <!-- Mobile Menu Button -->
-    <button onclick="toggleSidebar()" class="md:hidden fixed top-4 left-4 z-50 bg-church-900 text-white p-3 rounded-lg shadow-lg">
+    <button onclick="toggleSidebar()" class="md:hidden fixed top-4 left-4 z-30 bg-church-900 text-white p-3 rounded-lg shadow-lg">
         <i class="fas fa-bars"></i>
     </button>
 
@@ -144,18 +267,18 @@
     <div class="md:ml-64 min-h-screen">
         
         <!-- Header -->
-        <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+        <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
             <div class="px-6 py-4 flex justify-between items-center">
                 <div>
                     <h2 class="text-2xl font-serif font-bold text-gray-800" id="pageTitle">Dashboard</h2>
                     <p class="text-sm text-gray-500" id="currentDate"></p>
                 </div>
                 <div class="flex items-center gap-4">
-                    <button onclick="backupData()" class="hidden sm:flex items-center gap-2 px-4 py-2 bg-gold-100 text-gold-700 rounded-lg hover:bg-gold-200 transition-colors text-sm font-medium">
+                    <button onclick="backupData()" class="admin-only hidden sm:flex items-center gap-2 px-4 py-2 bg-gold-100 text-gold-700 rounded-lg hover:bg-gold-200 transition-colors text-sm font-medium">
                         <i class="fas fa-download"></i>
                         Backup
                     </button>
-                    <label class="hidden sm:flex items-center gap-2 px-4 py-2 bg-church-100 text-church-700 rounded-lg hover:bg-church-200 transition-colors text-sm font-medium cursor-pointer">
+                    <label class="admin-only hidden sm:flex items-center gap-2 px-4 py-2 bg-church-100 text-church-700 rounded-lg hover:bg-church-200 transition-colors text-sm font-medium cursor-pointer">
                         <i class="fas fa-upload"></i>
                         Restaurar
                         <input type="file" id="restoreFile" class="hidden" accept=".json" onchange="restoreData(this)">
@@ -172,6 +295,15 @@
 
             <!-- DASHBOARD SECTION -->
             <section id="dashboard" class="section-content fade-in">
+                <!-- Alerta Visualizador -->
+                <div id="viewerAlert" class="hidden mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-3">
+                    <i class="fas fa-info-circle text-blue-500 mt-0.5"></i>
+                    <div>
+                        <h4 class="font-medium text-blue-900">Modo Visualização Ativo</h4>
+                        <p class="text-sm text-blue-700 mt-1">Você está acessando como visitante. Entre com uma conta de administrador para editar dados.</p>
+                    </div>
+                </div>
+
                 <!-- Cards Resumo -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                     <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 card-hover">
@@ -261,7 +393,7 @@
                             <h3 class="font-serif text-lg font-bold text-gray-800">Controle de Mensalidades</h3>
                             <p class="text-sm text-gray-500">Gerencie os pagamentos mensais dos membros</p>
                         </div>
-                        <button onclick="openModal('membro')" class="px-4 py-2 bg-church-600 text-white rounded-lg hover:bg-church-700 transition-colors flex items-center gap-2">
+                        <button onclick="openModal('membro')" class="admin-only px-4 py-2 bg-church-600 text-white rounded-lg hover:bg-church-700 transition-colors flex items-center gap-2">
                             <i class="fas fa-plus"></i>
                             Novo Membro
                         </button>
@@ -285,7 +417,7 @@
                                     <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Nov</th>
                                     <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Dez</th>
                                     <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
-                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Ações</th>
+                                    <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider admin-only">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="tabelaMembros" class="divide-y divide-gray-100">
@@ -306,7 +438,7 @@
                                     <h3 class="font-serif text-lg font-bold text-gray-800">Histórico de Entradas</h3>
                                     <p class="text-sm text-gray-500">Coletas, doações e rendimentos</p>
                                 </div>
-                                <button onclick="openModal('entrada')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
+                                <button onclick="openModal('entrada')" class="admin-only px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
                                     <i class="fas fa-plus"></i>
                                     Nova Entrada
                                 </button>
@@ -319,7 +451,7 @@
                                             <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Descrição</th>
                                             <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Categoria</th>
                                             <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Valor</th>
-                                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase">Ações</th>
+                                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase admin-only">Ações</th>
                                         </tr>
                                     </thead>
                                     <tbody id="tabelaEntradas" class="divide-y divide-gray-100">
@@ -351,7 +483,7 @@
                                     <h3 class="font-serif text-lg font-bold text-gray-800">Histórico de Saídas</h3>
                                     <p class="text-sm text-gray-500">Pagamentos e despesas</p>
                                 </div>
-                                <button onclick="openModal('saida')" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2">
+                                <button onclick="openModal('saida')" class="admin-only px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2">
                                     <i class="fas fa-plus"></i>
                                     Nova Saída
                                 </button>
@@ -364,7 +496,7 @@
                                             <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Descrição</th>
                                             <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Categoria</th>
                                             <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Valor</th>
-                                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase">Ações</th>
+                                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase admin-only">Ações</th>
                                         </tr>
                                     </thead>
                                     <tbody id="tabelaSaidas" class="divide-y divide-gray-100">
@@ -483,6 +615,25 @@
     </div>
 
     <script>
+        // SISTEMA DE AUTENTICAÇÃO
+        const USUARIOS = {
+            'admin': { 
+                senha: 'Rcc2025!', 
+                nome: 'Coordenador', 
+                role: 'admin',
+                hash: btoa('Rcc2025!') // Simulação simples de hash
+            },
+            'visitante': { 
+                senha: 'ver2025', 
+                nome: 'Visitante', 
+                role: 'viewer',
+                hash: btoa('ver2025')
+            }
+        };
+
+        let usuarioAtual = null;
+        let sessionTimeout = null;
+
         // Dados iniciais baseados na planilha
         let dados = {
             membros: [
@@ -540,11 +691,183 @@
 
         // Inicialização
         document.addEventListener('DOMContentLoaded', () => {
+            verificarSessao();
             carregarDados();
             atualizarData();
-            renderizarTudo();
-            setInterval(atualizarData, 60000);
+            
+            // Verificar sessão salva
+            const sessaoSalva = localStorage.getItem('rcc_financeiro_sessao');
+            if (sessaoSalva) {
+                const sessao = JSON.parse(sessaoSalva);
+                if (sessao.lembrar && USUARIOS[sessao.usuario]) {
+                    fazerLoginAutomatico(sessao.usuario);
+                }
+            }
+            
+            // Event listeners para timeout de sessão
+            document.addEventListener('mousemove', resetSessionTimeout);
+            document.addEventListener('keypress', resetSessionTimeout);
         });
+
+        function verificarSessao() {
+            if (!usuarioAtual) {
+                document.getElementById('loginScreen').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function fazerLogin() {
+            const usuario = document.getElementById('loginUser').value.trim().toLowerCase();
+            const senha = document.getElementById('loginPass').value;
+            const lembrar = document.getElementById('lembrarMe').checked;
+            
+            if (!usuario || !senha) {
+                mostrarErroLogin('Preencha usuário e senha');
+                return;
+            }
+            
+            const userData = USUARIOS[usuario];
+            
+            if (userData && senha === userData.senha) {
+                // Login bem-sucedido
+                usuarioAtual = {
+                    usuario: usuario,
+                    nome: userData.nome,
+                    role: userData.role,
+                    loginTime: new Date().toISOString()
+                };
+                
+                if (lembrar) {
+                    localStorage.setItem('rcc_financeiro_sessao', JSON.stringify({
+                        usuario: usuario,
+                        lembrar: true
+                    }));
+                }
+                
+                // Configurar interface baseada na role
+                configurarPermissoes();
+                
+                // Esconder login
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.body.style.overflow = '';
+                
+                // Atualizar UI
+                document.getElementById('userDisplay').textContent = userData.nome;
+                document.getElementById('roleDisplay').textContent = userData.role === 'admin' ? 'ADMIN' : 'VISUALIZADOR';
+                document.getElementById('roleDisplay').className = `ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold ${userData.role === 'admin' ? 'bg-gold-500 text-white' : 'bg-blue-500 text-white'}`;
+                
+                showToast(`Bem-vindo, ${userData.nome}!`);
+                renderizarTudo();
+                resetSessionTimeout();
+                
+            } else {
+                mostrarErroLogin('Usuário ou senha incorretos');
+                document.querySelector('.slide-in').classList.add('shake');
+                setTimeout(() => {
+                    document.querySelector('.slide-in').classList.remove('shake');
+                }, 500);
+            }
+        }
+
+        function fazerLoginAutomatico(usuario) {
+            const userData = USUARIOS[usuario];
+            usuarioAtual = {
+                usuario: usuario,
+                nome: userData.nome,
+                role: userData.role,
+                loginTime: new Date().toISOString()
+            };
+            configurarPermissoes();
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.body.style.overflow = '';
+            document.getElementById('userDisplay').textContent = userData.nome;
+            document.getElementById('roleDisplay').textContent = userData.role === 'admin' ? 'ADMIN' : 'VISUALIZADOR';
+            document.getElementById('roleDisplay').className = `ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold ${userData.role === 'admin' ? 'bg-gold-500 text-white' : 'bg-blue-500 text-white'}`;
+            renderizarTudo();
+        }
+
+        function mostrarErroLogin(msg) {
+            const erro = document.getElementById('loginError');
+            erro.querySelector('span').textContent = msg;
+            erro.classList.remove('hidden');
+            setTimeout(() => erro.classList.add('hidden'), 5000);
+        }
+
+        function configurarPermissoes() {
+            const isAdmin = usuarioAtual.role === 'admin';
+            
+            // Mostrar/ocultar elementos admin-only
+            document.querySelectorAll('.admin-only').forEach(el => {
+                if (isAdmin) {
+                    el.classList.remove('hidden');
+                    el.disabled = false;
+                } else {
+                    el.classList.add('hidden');
+                    el.disabled = true;
+                }
+            });
+            
+            // Mostrar badge de visualizador
+            if (!isAdmin) {
+                document.getElementById('readOnlyBadge').classList.remove('hidden');
+                document.getElementById('viewerAlert').classList.remove('hidden');
+            } else {
+                document.getElementById('readOnlyBadge').classList.add('hidden');
+                document.getElementById('viewerAlert').classList.add('hidden');
+            }
+        }
+
+        function fazerLogout() {
+            if (confirm('Tem certeza que deseja sair do sistema?')) {
+                usuarioAtual = null;
+                localStorage.removeItem('rcc_financeiro_sessao');
+                clearTimeout(sessionTimeout);
+                
+                // Limpar campos de login
+                document.getElementById('loginUser').value = '';
+                document.getElementById('loginPass').value = '';
+                document.getElementById('lembrarMe').checked = false;
+                
+                // Mostrar tela de login
+                document.getElementById('loginScreen').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                
+                showToast('Logout realizado com sucesso');
+            }
+        }
+
+        function resetSessionTimeout() {
+            if (sessionTimeout) clearTimeout(sessionTimeout);
+            if (usuarioAtual) {
+                // 30 minutos de inatividade
+                sessionTimeout = setTimeout(() => {
+                    alert('Sessão expirada por inatividade. Faça login novamente.');
+                    fazerLogout();
+                }, 30 * 60 * 1000);
+            }
+        }
+
+        function togglePassword() {
+            const input = document.getElementById('loginPass');
+            const icon = document.getElementById('eyeIcon');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        function mostrarAjuda() {
+            alert('Credenciais de acesso:\n\n👤 Administrador:\n   Usuário: admin\n   Senha: Rcc2025!\n\n👁️ Visualizador:\n   Usuário: visitante\n   Senha: ver2025\n\nO modo visualizador permite apenas consultar dados, sem editar.');
+        }
 
         function atualizarData() {
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -570,15 +893,14 @@
         }
 
         function showSection(sectionName) {
-            // Esconder todas as seções
+            if (!usuarioAtual) return;
+            
             document.querySelectorAll('.section-content').forEach(section => {
                 section.classList.add('hidden');
             });
             
-            // Mostrar seção selecionada
             document.getElementById(sectionName).classList.remove('hidden');
             
-            // Atualizar título
             const titulos = {
                 'dashboard': 'Dashboard',
                 'membros': 'Controle de Mensalidades',
@@ -588,7 +910,6 @@
             };
             document.getElementById('pageTitle').textContent = titulos[sectionName];
             
-            // Atualizar navegação ativa
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('bg-church-800');
             });
@@ -596,7 +917,6 @@
             
             currentSection = sectionName;
             
-            // Fechar sidebar no mobile
             if (window.innerWidth < 768) {
                 document.getElementById('sidebar').classList.add('-translate-x-full');
             }
@@ -605,6 +925,7 @@
         }
 
         function renderizarTudo() {
+            if (!usuarioAtual) return;
             atualizarDashboard();
             renderizarMembros();
             renderizarEntradas();
@@ -617,11 +938,9 @@
             const totalSaidas = dados.saidas.reduce((acc, s) => acc + s.valor, 0);
             const saldo = dados.saldoInicial + totalEntradas - totalSaidas;
             
-            // Atualizar cards
             document.getElementById('cardSaldo').textContent = formatarMoeda(saldo);
             document.getElementById('sidebarSaldo').textContent = formatarMoeda(saldo);
             
-            // Entradas e saídas do mês atual
             const hoje = new Date();
             const mesAtual = hoje.getMonth();
             const anoAtual = hoje.getFullYear();
@@ -637,7 +956,6 @@
             document.getElementById('cardEntradas').textContent = formatarMoeda(entradasMes);
             document.getElementById('cardSaidas').textContent = formatarMoeda(saidasMes);
             
-            // Calcular mensalidades
             let totalPagantes = 0;
             let totalDevido = 0;
             dados.membros.forEach(membro => {
@@ -652,7 +970,6 @@
             const percentual = totalDevido > 0 ? (totalPagantes / totalDevido) * 100 : 0;
             document.getElementById('barMensalidades').style.width = `${percentual}%`;
             
-            // Últimas transações
             const todasTransacoes = [
                 ...dados.entradas.map(e => ({...e, tipo: 'entrada'})),
                 ...dados.saidas.map(s => ({...s, tipo: 'saida'}))
@@ -676,7 +993,6 @@
                 </div>
             `).join('');
             
-            // Gráfico simples (simulado com canvas)
             desenharGrafico();
         }
 
@@ -688,7 +1004,6 @@
             
             ctx.clearRect(0, 0, width, height);
             
-            // Agrupar por mês
             const mesesDados = {};
             for (let i = 0; i < 6; i++) {
                 mesesDados[i] = { entradas: 0, saidas: 0 };
@@ -715,15 +1030,12 @@
                 const entradasH = mesesDados[mes].entradas * scale;
                 const saidasH = mesesDados[mes].saidas * scale;
                 
-                // Barra entradas
                 ctx.fillStyle = '#10b981';
                 ctx.fillRect(x, height - entradasH - 20, barWidth - 5, entradasH);
                 
-                // Barra saídas
                 ctx.fillStyle = '#ef4444';
                 ctx.fillRect(x + barWidth, height - saidasH - 20, barWidth - 5, saidasH);
                 
-                // Label mês
                 ctx.fillStyle = '#6b7280';
                 ctx.font = '10px Inter';
                 ctx.fillText(meses[mes], x + 5, height - 5);
@@ -732,6 +1044,8 @@
 
         function renderizarMembros() {
             const tbody = document.getElementById('tabelaMembros');
+            const isAdmin = usuarioAtual && usuarioAtual.role === 'admin';
+            
             tbody.innerHTML = dados.membros.map(membro => {
                 const total = Object.values(membro.pagamentos).reduce((acc, val) => {
                     return acc + (val === 'X' ? 0 : (parseFloat(val) || 0));
@@ -753,21 +1067,27 @@
                                 bgClass = 'bg-green-100 text-green-700';
                             }
                             
+                            const clickAction = isAdmin ? `onclick="editarPagamento(${membro.id}, ${idx})"` : '';
+                            const cursorClass = isAdmin ? 'cursor-pointer hover:opacity-80' : 'cursor-default';
+                            
                             return `
                                 <td class="px-2 py-4 text-center">
-                                    <button onclick="editarPagamento(${membro.id}, ${idx})" 
-                                            class="w-10 h-8 rounded ${bgClass} text-xs font-bold hover:opacity-80 transition-opacity">
+                                    <button ${clickAction} 
+                                            class="w-10 h-8 rounded ${bgClass} text-xs font-bold ${cursorClass} transition-opacity"
+                                            ${!isAdmin ? 'disabled' : ''}>
                                         ${display || '-'}
                                     </button>
                                 </td>
                             `;
                         }).join('')}
                         <td class="px-6 py-4 text-center font-bold text-church-600">${total > 0 ? total : '-'}</td>
+                        ${isAdmin ? `
                         <td class="px-6 py-4 text-center">
                             <button onclick="excluirMembro(${membro.id})" class="text-red-500 hover:text-red-700">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>
+                        ` : '<td class="admin-only hidden"></td>'}
                     </tr>
                 `;
             }).join('');
@@ -775,21 +1095,24 @@
 
         function renderizarEntradas() {
             const tbody = document.getElementById('tabelaEntradas');
+            const isAdmin = usuarioAtual && usuarioAtual.role === 'admin';
+            
             tbody.innerHTML = dados.entradas.sort((a, b) => new Date(b.data) - new Date(a.data)).map(e => `
                 <tr class="hover:bg-gray-50">
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatarData(e.data)}</td>
                     <td class="px-6 py-4 text-sm text-gray-900">${e.descricao}</td>
                     <td class="px-6 py-4 text-sm text-gray-500">${e.categoria}</td>
                     <td class="px-6 py-4 text-sm font-bold text-green-600 text-right">${formatarMoeda(e.valor)}</td>
+                    ${isAdmin ? `
                     <td class="px-6 py-4 text-center">
                         <button onclick="excluirEntrada(${e.id})" class="text-red-500 hover:text-red-700">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>
+                    ` : '<td class="admin-only hidden"></td>'}
                 </tr>
             `).join('');
             
-            // Resumo por categoria
             const categorias = {};
             dados.entradas.forEach(e => {
                 categorias[e.categoria] = (categorias[e.categoria] || 0) + e.valor;
@@ -808,21 +1131,24 @@
 
         function renderizarSaidas() {
             const tbody = document.getElementById('tabelaSaidas');
+            const isAdmin = usuarioAtual && usuarioAtual.role === 'admin';
+            
             tbody.innerHTML = dados.saidas.sort((a, b) => new Date(b.data) - new Date(a.data)).map(s => `
                 <tr class="hover:bg-gray-50">
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${formatarData(s.data)}</td>
                     <td class="px-6 py-4 text-sm text-gray-900">${s.descricao}</td>
                     <td class="px-6 py-4 text-sm text-gray-500">${s.categoria}</td>
                     <td class="px-6 py-4 text-sm font-bold text-red-600 text-right">${formatarMoeda(s.valor)}</td>
+                    ${isAdmin ? `
                     <td class="px-6 py-4 text-center">
                         <button onclick="excluirSaida(${s.id})" class="text-red-500 hover:text-red-700">
                             <i class="fas fa-trash"></i>
                         </button>
                     </td>
+                    ` : '<td class="admin-only hidden"></td>'}
                 </tr>
             `).join('');
             
-            // Resumo por categoria
             const categorias = {};
             dados.saidas.forEach(s => {
                 categorias[s.categoria] = (categorias[s.categoria] || 0) + s.valor;
@@ -873,8 +1199,12 @@
             }).join('');
         }
 
-        // Modal functions
         function openModal(type) {
+            if (!usuarioAtual || usuarioAtual.role !== 'admin') {
+                showToast('Apenas administradores podem adicionar registros');
+                return;
+            }
+            
             const modal = document.getElementById('modal');
             const title = document.getElementById('modalTitle');
             const content = document.getElementById('modalContent');
@@ -969,6 +1299,8 @@
         }
 
         function salvarMembro() {
+            if (!usuarioAtual || usuarioAtual.role !== 'admin') return;
+            
             const nome = document.getElementById('nomeMembro').value;
             if (!nome) return alert('Digite o nome do membro');
             
@@ -986,6 +1318,8 @@
         }
 
         function salvarEntrada() {
+            if (!usuarioAtual || usuarioAtual.role !== 'admin') return;
+            
             const data = document.getElementById('dataEntrada').value;
             const descricao = document.getElementById('descEntrada').value;
             const categoria = document.getElementById('catEntrada').value;
@@ -1003,6 +1337,8 @@
         }
 
         function salvarSaida() {
+            if (!usuarioAtual || usuarioAtual.role !== 'admin') return;
+            
             const data = document.getElementById('dataSaida').value;
             const descricao = document.getElementById('descSaida').value;
             const categoria = document.getElementById('catSaida').value;
@@ -1020,6 +1356,11 @@
         }
 
         function editarPagamento(membroId, mes) {
+            if (!usuarioAtual || usuarioAtual.role !== 'admin') {
+                showToast('Apenas administradores podem editar pagamentos');
+                return;
+            }
+            
             const membro = dados.membros.find(m => m.id === membroId);
             const valorAtual = membro.pagamentos[mes] || '';
             
@@ -1037,6 +1378,8 @@
         }
 
         function excluirMembro(id) {
+            if (!usuarioAtual || usuarioAtual.role !== 'admin') return;
+            
             if (confirm('Tem certeza que deseja excluir este membro?')) {
                 dados.membros = dados.membros.filter(m => m.id !== id);
                 salvarDados();
@@ -1046,6 +1389,8 @@
         }
 
         function excluirEntrada(id) {
+            if (!usuarioAtual || usuarioAtual.role !== 'admin') return;
+            
             if (confirm('Tem certeza que deseja excluir esta entrada?')) {
                 dados.entradas = dados.entradas.filter(e => e.id !== id);
                 salvarDados();
@@ -1055,6 +1400,8 @@
         }
 
         function excluirSaida(id) {
+            if (!usuarioAtual || usuarioAtual.role !== 'admin') return;
+            
             if (confirm('Tem certeza que deseja excluir esta saída?')) {
                 dados.saidas = dados.saidas.filter(s => s.id !== id);
                 salvarDados();
@@ -1084,6 +1431,11 @@
         }
 
         function backupData() {
+            if (!usuarioAtual || usuarioAtual.role !== 'admin') {
+                showToast('Apenas administradores podem fazer backup');
+                return;
+            }
+            
             const dataStr = JSON.stringify(dados, null, 2);
             const blob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -1095,6 +1447,11 @@
         }
 
         function restoreData(input) {
+            if (!usuarioAtual || usuarioAtual.role !== 'admin') {
+                showToast('Apenas administradores podem restaurar dados');
+                return;
+            }
+            
             const file = input.files[0];
             if (!file) return;
             
@@ -1141,13 +1498,19 @@
         }
 
         function aplicarFiltro() {
-            // Implementação básica de filtro
             showToast('Filtro aplicado!');
         }
 
         // Fechar modal ao clicar fora
         document.getElementById('modal').addEventListener('click', function(e) {
             if (e.target === this) closeModal();
+        });
+
+        // Enter para login
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !usuarioAtual) {
+                fazerLogin();
+            }
         });
     </script>
 </body>
